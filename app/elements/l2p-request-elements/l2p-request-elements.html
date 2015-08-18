@@ -1,0 +1,123 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<script>
+'use strict';
+
+var l2pBehaviors = {};
+(function(){
+  function request (method, url, params, postData) {
+    var req = new XMLHttpRequest();
+    var def = Promise.defer()
+    if (postData === undefined) {
+      postData = null;
+    }
+    // proxy!!
+    url = "http://127.0.0.1:8686/"+url
+    req.onreadystatechange = function(){
+      if (req.readyState === 4) {
+        if (req.status === 200) {
+          def.resolve(JSON.parse(req.response));
+        } else {
+          def.reject(req);
+        }
+      }
+    }
+    req.open(method, url);
+    req.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+    req.send(postData);
+    return def.promise;
+  }
+  window.request = request;
+  var clientId = "w1Hk2EGsl2iEg0VWOZR3dcwXdT2LswjBEDogZr5l3wPFJZ7cUUkFIKK6NvLfKVEk.apps.rwth-aachen.de";
+  var authBaseUrl = "https://oauth.campus.rwth-aachen.de/oauth2waitress/oauth2.svc/"
+  window.clientId = clientId;
+  window.authBaseUrl = authBaseUrl;
+
+  l2pBehaviors.Auth = {
+    authenticate: function () {
+      var authInfo = this.authInfo;
+      if (!this.authInfo.active && !this.authInfo.securetyToken) {
+        if (localStorage != null && localStorage.accessToken != null) {
+          authInfo.accessToken = localStorage.accessToken;
+          authInfo.active = Promise.resolve(authInfo.accessToken);
+        } else {
+          this.authInfo.active = request("POST", authBaseUrl+"code", null, "client_id="+clientId+"&scope=l2p2013.rwth userinfo.rwth")
+            .then(function(result){
+              console.log("Received user_code", result);
+              authInfo.deviceCode = result.device_code;
+              authInfo.userCode = result.user_code;
+              var newwindow = window.open("https://oauth.campus.rwth-aachen.de/manage/?q=verify&d="+authInfo.userCode,
+                'Authenticate','height=400,width=300');
+              newwindow.focus();
+              function pollSecurityToken (resolve) {
+                request("POST", authBaseUrl+"token", null, "client_id="+clientId+"&code="+authInfo.deviceCode+"&grant_type=device")
+                .then(function(result){
+                  if (result.access_token != null) {
+                    authInfo.accessToken = result.access_token;
+                    if (localStorage != null) {
+                      localStorage.accessToken = authInfo.accessToken;
+                    }
+                    resolve(authInfo.accessToken);
+                  } else {
+                    window.setTimeout(function(){
+                      pollSecurityToken(resolve);
+                    },200);
+                  }
+                });
+              }
+              return new Promise(function(resolve, reject){
+                pollSecurityToken(resolve);
+              });
+            });
+        }
+      }
+      return this.authInfo.active;
+    },
+    queryL2p: function (method, paramString) {
+      return this.authenticate().then(function(accessToken){
+        return request("GET", "https://www3.elearning.rwth-aachen.de/_vti_bin/L2PServices/api.svc/v1/"+method+"?accessToken="+accessToken, null)
+      });
+    },
+    properties: {
+      authInfo: {
+        type: Object,
+        value: { // yeah, its a shared property!
+          accessToken: false, // append this on every request
+          created: 0, // when this was created
+          active: false, // currently querying for authentication
+          deviceCode: false,
+          userCode: false
+        }
+      }
+    }
+  };
+})();
+
+Polymer({
+  is: 'l2p-request-courses',
+  attached: function () {
+    var self = this;
+    this.queryL2p("viewAllCourseInfo").then(function(res){
+      self._setResult(res.dataSet);
+    })
+  },
+  behaviors: [l2pBehaviors.Auth],
+  properties: {
+    result: {
+      type: Array,
+      notify: true,
+      readOnly: true
+    }
+  }
+});
+</script>
