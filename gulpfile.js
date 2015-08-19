@@ -206,7 +206,7 @@ gulp.task('serve', ['styles', 'elements', 'images'], function () {
   gulp.watch(['app/**/*.html'], reload);
   gulp.watch(['app/styles/**/*.css'], ['styles', reload]);
   gulp.watch(['app/elements/**/*.css'], ['elements', reload]);
-  gulp.watch(['app/{scripts,elements}/**/*.js'], ['jshint']);
+  //gulp.watch(['app/{scripts,elements}/**/*.js'], ['jshint']); 
   gulp.watch(['app/images/**/*'], reload);
 });
 
@@ -237,7 +237,7 @@ gulp.task('default', ['clean'], function (cb) {
   runSequence(
     ['copy', 'styles'],
     'elements',
-    ['jshint', 'images', 'fonts', 'html'],
+    [/*'jshint',*/ 'images', 'fonts', 'html'],
     'vulcanize', 'precache',
     cb);
     // Note: add , 'precache' , after 'vulcanize', if your are going to use Service Worker

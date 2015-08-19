@@ -68,6 +68,7 @@ var l2pBehaviors = {};
                       localStorage.accessToken = authInfo.accessToken;
                     }
                     resolve(authInfo.accessToken);
+                    authInfo.active = false;
                   } else {
                     window.setTimeout(function(){
                       pollSecurityToken(resolve);
@@ -83,9 +84,41 @@ var l2pBehaviors = {};
       }
       return this.authInfo.active;
     },
-    queryL2p: function (method, paramString) {
-      return this.authenticate().then(function(accessToken){
-        return request("GET", "https://www3.elearning.rwth-aachen.de/_vti_bin/L2PServices/api.svc/v1/"+method+"?accessToken="+accessToken, null)
+    queryL2p: function (method, courseid) {
+      if (courseid == null) {
+        courseid = ""
+      } else {
+        courseid = "&cid="+courseid;
+      }
+      var self = this;
+      var usedAccessToken;
+      function makeRequest() {
+        return self.authenticate().then(function(accessToken){
+          usedAccessToken = accessToken;
+          return request("GET", "https://www3.elearning.rwth-aachen.de/_vti_bin/L2PServices/api.svc/v1/"+method+"?accessToken="+accessToken+courseid, null);
+        });
+      }
+      return new Promise(function(resolve){
+        makeRequest().then(function(res){
+          resolve(res);
+        }).catch(function(error){
+          if (error.status === 401) {
+            if (usedAccessToken === self.authInfo.accessToken){
+              // only delete if it was teh used access token
+              self.authInfo.accessToken = false;
+              if (localStorage != null) {
+                delete localStorage.accessToken;
+              }
+            }
+          } else {
+            throw new Error("This error code is unexpected! Auth failure!");
+          }
+          makeRequest().then(function(res){
+            resolve(res);
+          }).catch(function(){
+            throw new Error("Failure on login!, can't fix it.. ");
+          });
+        });
       });
     },
     properties: {
@@ -102,6 +135,155 @@ var l2pBehaviors = {};
     }
   };
 })();
+Polymer({
+  is: 'l2p-request-shared-documents,
+  performQuery: function (courseid) {
+    var self = this;
+    this.queryL2p("viewAllSharedDocuments", courseid).then(function(res){
+      self._setResult(res.dataSet);
+    })
+  },
+  behaviors: [l2pBehaviors.Auth],
+  properties: {
+    result: {
+      type: Array,
+      notify: true,
+      readOnly: true
+    },
+    courseid: {
+      type: String,
+      notify: true
+    },
+  },
+  observers: [
+    "performQuery(courseid)"
+  ]
+});
+
+Polymer({
+  is: 'l2p-request-assignments',
+  performQuery: function (courseid) {
+    var self = this;
+    this.queryL2p("viewAllAssignments", courseid).then(function(res){
+      self._setResult(res.dataSet);
+    })
+  },
+  behaviors: [l2pBehaviors.Auth],
+  properties: {
+    result: {
+      type: Array,
+      notify: true,
+      readOnly: true
+    },
+    courseid: {
+      type: String,
+      notify: true
+    },
+  },
+  observers: [
+    "performQuery(courseid)"
+  ]
+});
+
+Polymer({
+  is: 'l2p-request-media-libraries',
+  performQuery: function (courseid) {
+    var self = this;
+    this.queryL2p("viewAllMediaLibraries", courseid).then(function(res){
+      self._setResult(res.dataSet);
+    })
+  },
+  behaviors: [l2pBehaviors.Auth],
+  properties: {
+    result: {
+      type: Array,
+      notify: true,
+      readOnly: true
+    },
+    courseid: {
+      type: String,
+      notify: true
+    },
+  },
+  observers: [
+    "performQuery(courseid)"
+  ]
+});
+
+Polymer({
+  is: 'l2p-request-announcements',
+  performQuery: function (courseid) {
+    var self = this;
+    this.queryL2p("viewAllAnouncements", courseid).then(function(res){
+      self._setResult(res.dataSet);
+    })
+  },
+  behaviors: [l2pBehaviors.Auth],
+  properties: {
+    result: {
+      type: Array,
+      notify: true,
+      readOnly: true
+    },
+    courseid: {
+      type: String,
+      notify: true
+    },
+  },
+  observers: [
+    "performQuery(courseid)"
+  ]
+});
+
+Polymer({
+  is: 'l2p-request-Emails',
+  performQuery: function (courseid) {
+    var self = this;
+    this.queryL2p("viewAllEmails", courseid).then(function(res){
+      self._setResult(res.dataSet);
+    })
+  },
+  behaviors: [l2pBehaviors.Auth],
+  properties: {
+    result: {
+      type: Array,
+      notify: true,
+      readOnly: true
+    },
+    courseid: {
+      type: String,
+      notify: true
+    },
+  },
+  observers: [
+    "performQuery(courseid)"
+  ]
+});
+
+Polymer({
+  is: 'l2p-request-learning-materials',
+  performQuery: function (courseid) {
+    var self = this;
+    this.queryL2p("viewAllLearningMaterials", courseid).then(function(res){
+      self._setResult(res.dataSet);
+    })
+  },
+  behaviors: [l2pBehaviors.Auth],
+  properties: {
+    result: {
+      type: Array,
+      notify: true,
+      readOnly: true
+    },
+    courseid: {
+      type: String,
+      notify: true
+    },
+  },
+  observers: [
+    "performQuery(courseid)"
+  ]
+});
 
 Polymer({
   is: 'l2p-request-courses',
