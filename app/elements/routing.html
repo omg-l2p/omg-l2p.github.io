@@ -18,15 +18,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     page('/', function () {
       app.route = 'home';
     });
-
-    page('/:course', function (data) {
+    page('/:course', function(data){
+      page.redirect("/"+data.params.course+"/learning-materials/")
+    })
+    page('/:course/:category/:path*', function (data) {
       app.route = 'course';
+      if (data.params.path == null) {
+        data.params.path = "";
+      }
       app.params = data.params;
     });
 
     // add #! before urls
     page({
-      hashbang: true
+      //hashbang: true
     });
 
   });

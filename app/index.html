@@ -23,7 +23,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <meta name="theme-color" content="#303F9F">
 
   <!-- Web Application Manifest -->
-  <link rel="manifest" href="manifest.json">
+  <link rel="manifest" href="/manifest.json">
 
   <!-- Tile color for Win8 -->
   <meta name="msapplication-TileColor" content="#3372DF">
@@ -31,27 +31,27 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <!-- Add to homescreen for Chrome on Android -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="application-name" content="PSK">
-  <link rel="icon" sizes="192x192" href="images/touch/chrome-touch-icon-192x192.png">
+  <link rel="icon" sizes="192x192" href="/images/touch/chrome-touch-icon-192x192.png">
 
   <!-- Add to homescreen for Safari on iOS -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="Polymer Starter Kit">
-  <link rel="apple-touch-icon" href="images/touch/apple-touch-icon.png">
+  <link rel="apple-touch-icon" href="/images/touch/apple-touch-icon.png">
 
   <!-- Tile icon for Win8 (144x144) -->
-  <meta name="msapplication-TileImage" content="images/touch/ms-touch-icon-144x144-precomposed.png">
+  <meta name="msapplication-TileImage" content="/images/touch/ms-touch-icon-144x144-precomposed.png">
 
   <!-- build:css styles/main.css -->
-  <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="/styles/main.css">
   <!-- endbuild-->
 
   <!-- build:js bower_components/webcomponentsjs/webcomponents-lite.min.js -->
-  <script src="bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="/bower_components/webcomponentsjs/webcomponents-lite.js"></script>
   <!-- endbuild -->
 
-  <!-- will be replaced with elements/elements.vulcanized.html -->
-  <link rel="import" href="elements/elements.html">
+  <!-- will be replaced with /elements/elements.vulcanized.html -->
+  <link rel="import" href="/elements/elements.html">
   <!-- endreplace-->
 </head>
 
@@ -76,10 +76,27 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 <iron-icon icon="home"></iron-icon>
                 <span>Home</span>
               </a>
-              <a data-route="course" href="/14ws-02517">
+            </paper-menu>
+          </section>
+          <section data-route="course">
+            <paper-menu class="list" attr-for-selected="data-route" selected="{{params.category}}" on-iron-select="onMenuSelect">
+              <a data-route="home" href="/">
                 <iron-icon icon="home"></iron-icon>
-                <span>Course</span>
+                <span>Go Back</span>
               </a>
+              <a data-route="anouncements" href="{{concatUrl(params.course, 'anouncements')}}">
+                <iron-icon icon="home"></iron-icon>
+                <span>Anouncements</span>
+              </a>
+              <a data-route="emails" href="{{concatUrl(params.course, 'emails')}}">
+                <iron-icon icon="home"></iron-icon>
+                <span>Emails</span>
+              </a>
+              <a data-route="learning-materials" href="{{concatUrl(params.course, 'learning-materials')}}">
+                <iron-icon icon="home"></iron-icon>
+                <span>Learning Materials</span>
+              </a>
+
             </paper-menu>
           </section>
         </iron-pages>
@@ -116,18 +133,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               <paper-material elevation="1">
                 <l2p-request-courses result="{{courses}}"> </l2p-request-courses>
                 <template is="dom-repeat" items="[[courses]]">
-                    <div><a href="[[item.uniqueid]]">[[item.courseTitle]]</span></div>
+                    <div><a href="{{concatUrl(item.uniqueid,'learning-materials')}}">[[item.courseTitle]]</span></div>
                 </template>
               </paper-material>
             </section>
 
             <section data-route="course">
-              <paper-material elevation="1">
-                <l2p-request-learning-materials result="{{learningMaterials}}"></l2p-request-learning-materials>
-                <h2 class="paper-font-display2">Course</h2>
-                <p>This is the users section</p>
-                <a href="/users/Rob/42">Rob</a>
-              </paper-material>
+              <iron-pages attr-for-selected="data-route" selected="{{params.category}}">
+                <section data-route="learning-materials">
+                  <paper-material elevation="1">
+                    <l2p-request-learning-materials result="{{learningMaterials}}" course="{{params.course}}"></l2p-request-learning-materials>
+                    <l2p-filelist files="{{learningMaterials}}" currentpath="{{params.path}}" pp="{{params.path}}"></l2p-filelist>
+                  </paper-material>
+                </section>
+              </iron-pages>
             </section>
 
           </iron-pages>
@@ -139,20 +158,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                  text="Caching complete! This app will work offline.">
     </paper-toast>
 
-    <platinum-sw-register auto-register
+    <!--platinum-sw-register auto-register
                           clients-claim
                           skip-waiting
                           on-service-worker-installed="displayInstalledToast">
       <platinum-sw-cache default-cache-strategy="networkFirst"
                          precache-file="precache.json">
       </platinum-sw-cache>
-    </platinum-sw-register>
+    </platinum-sw-register-->
 
 
   </template>
 
   <!-- build:js scripts/app.js -->
-  <script src="scripts/app.js"></script>
+  <script src="/scripts/app.js"></script>
   <!-- endbuild-->
 </body>
 

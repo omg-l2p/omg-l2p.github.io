@@ -136,7 +136,7 @@ var l2pBehaviors = {};
   };
 })();
 Polymer({
-  is: 'l2p-request-shared-documents,
+  is: 'l2p-request-shared-documents',
   performQuery: function (courseid) {
     var self = this;
     this.queryL2p("viewAllSharedDocuments", courseid).then(function(res){
@@ -262,9 +262,9 @@ Polymer({
 
 Polymer({
   is: 'l2p-request-learning-materials',
-  performQuery: function (courseid) {
+  performQuery: function (course) {
     var self = this;
-    this.queryL2p("viewAllLearningMaterials", courseid).then(function(res){
+    this.queryL2p("viewAllLearningMaterials", course).then(function(res){
       self._setResult(res.dataSet);
     })
   },
@@ -275,13 +275,13 @@ Polymer({
       notify: true,
       readOnly: true
     },
-    courseid: {
+    course: {
       type: String,
       notify: true
     },
   },
   observers: [
-    "performQuery(courseid)"
+    "performQuery(course)"
   ]
 });
 
