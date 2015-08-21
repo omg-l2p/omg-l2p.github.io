@@ -12,33 +12,26 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <dom-module id="l2p-filelist">
   <template>
-    <template id="filelist" is="dom-repeat" items="[[files]]" filter="matchesCurrentPath">
-      <template is="dom-if" if="{{item.isDirectory}}">
-        <div>Dir: <a href="{{addToCurrentUrl(item.name, item.isDirectory)}}">[[item.name]]</span></div>
-      </template>
-      <template is="dom-if" if="{{!item.isDirectory}}">
-        <div>File: <a href="{{concatUrl(item.uniqueid,'learning-materials')}}">[[item.name]]</span></div>
-      </template>
-    </template>
     <style>
       .filelist > iron-icon {
         padding-right: 10px;
       }
       a {
         text-decoration: none;
+        color: var(--default-primary-color);
       }
     </style>
-    <template is="dom-repeat" items="[[files]]">
-         <a href="/">
-           <paper-item class="filelist">
-             <iron-icon icon="{{getIcon(item)}}"></iron-icon>
-             <paper-item-body two-line>
-               <div>[[item.name]]</div>
-               <div secondary>More info</div>
-             </paper-item-body>
-           </paper-item>
-         </a>
-       </template>
+    <template id="filelist" is="dom-repeat" items="[[files]]" filter="matchesCurrentPath">
+      <a href="{{addToCurrentUrl(item.name, item.isDirectory)}}">
+        <paper-item class="filelist">
+          <iron-icon icon="{{getIcon(item)}}"></iron-icon>
+          <paper-item-body two-line>
+            <div>[[item.name]]</div>
+            <div secondary>More info</div>
+          </paper-item-body>
+        </paper-item>
+      </a>
+    </template>
   </template>
   <script>
   (function() {

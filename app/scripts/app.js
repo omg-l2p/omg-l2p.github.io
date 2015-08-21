@@ -12,8 +12,9 @@ function matchesPath(){
   var app = document.querySelector("#app");
 
   // copy behaviors
-  app.concatUrl = Behaviors.Url.concatUrl;
-  app.addToCurrentUrl = Behaviors.Url.addToCurrentUrl;
+  for (var b in Behaviors.Url) {
+    app[b] = Behaviors.Url[b]
+  }
 
   app.displayInstalledToast = function() {
     document.querySelector('#caching-complete').show();

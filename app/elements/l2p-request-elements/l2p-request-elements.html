@@ -21,8 +21,6 @@ var l2pBehaviors = {};
     if (postData === undefined) {
       postData = null;
     }
-    // proxy!!
-    url = "http://127.0.0.1:8686/"+url
     req.onreadystatechange = function(){
       if (req.readyState === 4) {
         if (req.status === 200) {
@@ -37,9 +35,29 @@ var l2pBehaviors = {};
     req.send(postData);
     return def.promise;
   }
+  function requestBinary (url, params, responseType) {
+    var req = new XMLHttpRequest();
+    var def = Promise.defer()
+    req.onreadystatechange = function(){
+      if (req.readyState === 4) {
+        if (req.status === 200) {
+          def.resolve(req.response);
+        } else {
+          def.reject(req);
+        }
+      }
+    }
+    req.open("Get", url);
+    req.responseType = responseType
+    req.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+    req.send(null);
+    return def.promise;
+  }
   window.request = request;
-  var clientId = "w1Hk2EGsl2iEg0VWOZR3dcwXdT2LswjBEDogZr5l3wPFJZ7cUUkFIKK6NvLfKVEk.apps.rwth-aachen.de";
+  var proxyUrl = "http://127.0.0.1:8686/"
+  var clientId = "w1Hk2EGsl2iEg0VWOZR3dcwXdT2LswjBEDogZr5l3wPFJZ7cUUkFIKK6NvLfKVEk.apps.rwth-aachen.de"
   var authBaseUrl = "https://oauth.campus.rwth-aachen.de/oauth2waitress/oauth2.svc/"
+  authBaseUrl = proxyUrl + authBaseUrl
   window.clientId = clientId;
   window.authBaseUrl = authBaseUrl;
 
@@ -84,26 +102,42 @@ var l2pBehaviors = {};
       }
       return this.authInfo.active;
     },
-    queryL2p: function (method, courseid) {
-      if (courseid == null) {
-        courseid = ""
-      } else {
-        courseid = "&cid="+courseid;
-      }
+    getL2pQueryUrl: function(method, params) {
       var self = this;
       var usedAccessToken;
+      return self.authenticate().then(function(accessToken){
+        usedAccessToken = accessToken;
+        // create query parameter..
+        if (params == null) {
+          params = {}
+        }
+        params.accessToken = accessToken;
+        var paramlist = []
+        for (var name in params) {
+          paramlist.push(name+"="+params[name])
+        }
+        var query = "?" + paramlist.join("&")
+        var url = "https://www3.elearning.rwth-aachen.de/_vti_bin/L2PServices/api.svc/v1/" + method + query
+        // proxy!!
+        url = proxyUrl+url
+        return Promise.resolve(url)
+      });
+    },
+    queryL2p: function (method, params) {
+      var self = this
+      var usedAccessToken;
       function makeRequest() {
-        return self.authenticate().then(function(accessToken){
-          usedAccessToken = accessToken;
-          return request("GET", "https://www3.elearning.rwth-aachen.de/_vti_bin/L2PServices/api.svc/v1/"+method+"?accessToken="+accessToken+courseid, null);
-        });
+        return self.getL2pQueryUrl(method, params).then(function(url, accessToken){
+          usedAccessToken = accessToken
+          return request("Get", url, null)
+        })
       }
       return new Promise(function(resolve){
         makeRequest().then(function(res){
           resolve(res);
         }).catch(function(error){
           if (error.status === 401) {
-            if (usedAccessToken === self.authInfo.accessToken){
+            if (usedAccessToken === self.authInfo.accessToken || true){
               // only delete if it was teh used access token
               self.authInfo.accessToken = false;
               if (localStorage != null) {
@@ -134,172 +168,207 @@ var l2pBehaviors = {};
       }
     }
   };
-})();
-Polymer({
-  is: 'l2p-request-shared-documents',
-  performQuery: function (courseid) {
-    var self = this;
-    this.queryL2p("viewAllSharedDocuments", courseid).then(function(res){
-      self._setResult(res.dataSet);
-    })
-  },
-  behaviors: [l2pBehaviors.Auth],
-  properties: {
-    result: {
-      type: Array,
-      notify: true,
-      readOnly: true
+  Polymer({
+    is: 'l2p-request-download-file',
+    performQuery: function (course, downloadurl) {
+      var self = this;
+      this.getL2pQueryUrl("downloadFile/News 05122014.pdf", {downloadUrl: downloadurl, cid: course}).then(function(url){
+        console.log(url)
+        self._setResult(url)
+        /*
+        requestBinary(url, {}, "arraybuffer").then(function(arraybuffer){
+          self._setResult(new Uint8Array(arraybuffer))
+        })*/
+      })
     },
-    courseid: {
-      type: String,
-      notify: true
+    behaviors: [l2pBehaviors.Auth],
+    properties: {
+      result: {
+        type: String,
+        notify: true,
+        readOnly: true
+      },
+      course: {
+        type: String,
+        notify: true
+      },
+      downloadurl: {
+        type: String,
+        notify: true
+      }
     },
-  },
-  observers: [
-    "performQuery(courseid)"
-  ]
-});
+    observers: [
+      "performQuery(course, downloadurl)"
+    ]
+  });
 
-Polymer({
-  is: 'l2p-request-assignments',
-  performQuery: function (courseid) {
-    var self = this;
-    this.queryL2p("viewAllAssignments", courseid).then(function(res){
-      self._setResult(res.dataSet);
-    })
-  },
-  behaviors: [l2pBehaviors.Auth],
-  properties: {
-    result: {
-      type: Array,
-      notify: true,
-      readOnly: true
+  Polymer({
+    is: 'l2p-request-shared-documents',
+    performQuery: function (courseid) {
+      var self = this;
+      this.queryL2p("viewAllSharedDocuments", {cid: courseid}).then(function(res){
+        self._setResult(res.dataSet);
+      })
     },
-    courseid: {
-      type: String,
-      notify: true
+    behaviors: [l2pBehaviors.Auth],
+    properties: {
+      result: {
+        type: Array,
+        notify: true,
+        readOnly: true
+      },
+      courseid: {
+        type: String,
+        notify: true
+      },
     },
-  },
-  observers: [
-    "performQuery(courseid)"
-  ]
-});
+    observers: [
+      "performQuery(courseid)"
+    ]
+  });
 
-Polymer({
-  is: 'l2p-request-media-libraries',
-  performQuery: function (courseid) {
-    var self = this;
-    this.queryL2p("viewAllMediaLibraries", courseid).then(function(res){
-      self._setResult(res.dataSet);
-    })
-  },
-  behaviors: [l2pBehaviors.Auth],
-  properties: {
-    result: {
-      type: Array,
-      notify: true,
-      readOnly: true
+  Polymer({
+    is: 'l2p-request-assignments',
+    performQuery: function (courseid) {
+      var self = this;
+      this.queryL2p("viewAllAssignments", {cid: courseid}).then(function(res){
+        self._setResult(res.dataSet);
+      })
     },
-    courseid: {
-      type: String,
-      notify: true
+    behaviors: [l2pBehaviors.Auth],
+    properties: {
+      result: {
+        type: Array,
+        notify: true,
+        readOnly: true
+      },
+      courseid: {
+        type: String,
+        notify: true
+      },
     },
-  },
-  observers: [
-    "performQuery(courseid)"
-  ]
-});
+    observers: [
+      "performQuery(courseid)"
+    ]
+  });
 
-Polymer({
-  is: 'l2p-request-announcements',
-  performQuery: function (courseid) {
-    var self = this;
-    this.queryL2p("viewAllAnouncements", courseid).then(function(res){
-      self._setResult(res.dataSet);
-    })
-  },
-  behaviors: [l2pBehaviors.Auth],
-  properties: {
-    result: {
-      type: Array,
-      notify: true,
-      readOnly: true
+  Polymer({
+    is: 'l2p-request-media-libraries',
+    performQuery: function (courseid) {
+      var self = this;
+      this.queryL2p("viewAllMediaLibraries", {cid: courseid}).then(function(res){
+        self._setResult(res.dataSet);
+      })
     },
-    courseid: {
-      type: String,
-      notify: true
+    behaviors: [l2pBehaviors.Auth],
+    properties: {
+      result: {
+        type: Array,
+        notify: true,
+        readOnly: true
+      },
+      courseid: {
+        type: String,
+        notify: true
+      },
     },
-  },
-  observers: [
-    "performQuery(courseid)"
-  ]
-});
+    observers: [
+      "performQuery(courseid)"
+    ]
+  });
 
-Polymer({
-  is: 'l2p-request-Emails',
-  performQuery: function (courseid) {
-    var self = this;
-    this.queryL2p("viewAllEmails", courseid).then(function(res){
-      self._setResult(res.dataSet);
-    })
-  },
-  behaviors: [l2pBehaviors.Auth],
-  properties: {
-    result: {
-      type: Array,
-      notify: true,
-      readOnly: true
+  Polymer({
+    is: 'l2p-request-announcements',
+    performQuery: function (courseid) {
+      var self = this;
+      this.queryL2p("viewAllAnouncements", {cid: courseid}).then(function(res){
+        self._setResult(res.dataSet);
+      })
     },
-    courseid: {
-      type: String,
-      notify: true
+    behaviors: [l2pBehaviors.Auth],
+    properties: {
+      result: {
+        type: Array,
+        notify: true,
+        readOnly: true
+      },
+      courseid: {
+        type: String,
+        notify: true
+      },
     },
-  },
-  observers: [
-    "performQuery(courseid)"
-  ]
-});
+    observers: [
+      "performQuery(courseid)"
+    ]
+  });
 
-Polymer({
-  is: 'l2p-request-learning-materials',
-  performQuery: function (course) {
-    var self = this;
-    this.queryL2p("viewAllLearningMaterials", course).then(function(res){
-      self._setResult(res.dataSet);
-    })
-  },
-  behaviors: [l2pBehaviors.Auth],
-  properties: {
-    result: {
-      type: Array,
-      notify: true,
-      readOnly: true
+  Polymer({
+    is: 'l2p-request-Emails',
+    performQuery: function (courseid) {
+      var self = this;
+      this.queryL2p("viewAllEmails", {cid: courseid}).then(function(res){
+        self._setResult(res.dataSet);
+      })
     },
-    course: {
-      type: String,
-      notify: true
+    behaviors: [l2pBehaviors.Auth],
+    properties: {
+      result: {
+        type: Array,
+        notify: true,
+        readOnly: true
+      },
+      courseid: {
+        type: String,
+        notify: true
+      },
     },
-  },
-  observers: [
-    "performQuery(course)"
-  ]
-});
+    observers: [
+      "performQuery(courseid)"
+    ]
+  });
 
-Polymer({
-  is: 'l2p-request-courses',
-  attached: function () {
-    var self = this;
-    this.queryL2p("viewAllCourseInfo").then(function(res){
-      self._setResult(res.dataSet);
-    })
-  },
-  behaviors: [l2pBehaviors.Auth],
-  properties: {
-    result: {
-      type: Array,
-      notify: true,
-      readOnly: true
+  Polymer({
+    is: 'l2p-request-learning-materials',
+    performQuery: function (course) {
+      var self = this;
+      this.queryL2p("viewAllLearningMaterials", {cid: course}).then(function(res){
+        self._setResult(res.dataSet);
+      })
+    },
+    behaviors: [l2pBehaviors.Auth],
+    properties: {
+      result: {
+        type: Array,
+        notify: true,
+        readOnly: true
+      },
+      course: {
+        type: String,
+        notify: true
+      },
+    },
+    observers: [
+      "performQuery(course)"
+    ]
+  });
+
+  Polymer({
+    is: 'l2p-request-courses',
+    attached: function () {
+      var self = this;
+      this.queryL2p("viewAllCourseInfo").then(function(res){
+        self._setResult(res.dataSet);
+      })
+    },
+    behaviors: [l2pBehaviors.Auth],
+    properties: {
+      result: {
+        type: Array,
+        notify: true,
+        readOnly: true
+      }
     }
-  }
-});
+  });
+
+})();
 </script>

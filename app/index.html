@@ -141,10 +141,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <section data-route="course">
               <iron-pages attr-for-selected="data-route" selected="{{params.category}}">
                 <section data-route="learning-materials">
-                  <paper-material elevation="1">
-                    <l2p-request-learning-materials result="{{learningMaterials}}" course="{{params.course}}"></l2p-request-learning-materials>
-                    <l2p-filelist files="{{learningMaterials}}" currentpath="{{params.path}}" pp="{{params.path}}"></l2p-filelist>
-                  </paper-material>
+                  <template is="dom-if" if="{{pathIsDirectory}}">
+                    <paper-material elevation="1">
+                      <l2p-request-learning-materials result="{{learningMaterials}}" course="{{params.course}}"></l2p-request-learning-materials>
+                      <l2p-filelist files="{{learningMaterials}}" currentpath="{{params.path}}" pp="{{params.path}}"></l2p-filelist>
+                      <l2p-request-download-file result="{{download}}" course="14ws-02517" downloadurl="|/ws14/14ws-02517/Lists/StructuredMaterials/Vorlesung/News 05122014.pdf"></l2p-request-download-file>
+                      <a href="{{download}}">File url</a>
+                    </paper-material>
+                  </template>
+                  <template is="dom-if" if="{{pathIsFile}}">
+                    <template is="dom-if" if="{{checkFileExtention('pdf')}}">
+                      <p> its a pdf </p>
+                      <pdf-viewer url="{{download}}">
+                    </template>
+                  </template>
                 </section>
               </iron-pages>
             </section>

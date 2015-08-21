@@ -27,6 +27,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         data.params.path = "";
       }
       app.params = data.params;
+      app.pathIsFile = page.current[page.current.length - 1] !== '/'
+      app.pathIsDirectory = !app.pathIsFile
     });
 
     // add #! before urls
