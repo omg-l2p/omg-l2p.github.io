@@ -21,6 +21,7 @@ var path = require('path');
 var fs = require('fs');
 var glob = require('glob');
 var historyApiFallback = require('connect-history-api-fallback');
+var ghPages = require('gulp-gh-pages')
 
 var AUTOPREFIXER_BROWSERS = [
   'ie >= 10',
@@ -242,6 +243,13 @@ gulp.task('default', ['clean'], function (cb) {
     cb);
     // Note: add , 'precache' , after 'vulcanize', if your are going to use Service Worker
 });
+
+gulp.task('deploy', ['default'], function(){
+  return gulp.src('./dist/**/*')
+    .pipe(ghPages({
+      branch: "master"
+    }));
+})
 
 // Load tasks for web-component-tester
 // Adds tasks for `gulp test:local` and `gulp test:remote`
