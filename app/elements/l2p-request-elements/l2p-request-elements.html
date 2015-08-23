@@ -76,8 +76,6 @@ var l2pBehaviors = {};
               authInfo.deviceCode = result.device_code;
               authInfo.userCode = result.user_code;
               self.loginUrl = "https://oauth.campus.rwth-aachen.de/manage/?q=verify&d="+authInfo.userCode
-              var newwindow = window.open(self.loginUrl, 'Authenticate','height=400,width=300');
-              if (newwindow != null) {newwindow.focus()};
               function pollSecurityToken (resolve) {
                 request("POST", authBaseUrl+"token", null, "client_id="+clientId+"&code="+authInfo.deviceCode+"&grant_type=device")
                 .then(function(result){

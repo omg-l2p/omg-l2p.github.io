@@ -78,9 +78,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
           <!-- Toolbar icons -->
           <paper-icon-button icon="refresh"></paper-icon-button>
-          <template is="dom-if" if="{{loginUrl}}">
-            <a href="[[loginUrl]]" target="_blank"><paper-icon-button icon="icons:account-box"></paper-icon-button></a>
-          </template>
 
           <!-- Application name -->
           <div class="middle middle-container center horizontal layout">
@@ -90,10 +87,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           </div>
         </paper-toolbar>
         <!-- Main Content -->
+
         <div class="content">
+
+          <paper-dialog id="login-dialog" modal opened="{{loginUrl}}">
+            <a href="{{loginUrl}}" target="_blank">
+              <paper-button raised>Login to L2P</paper-button>
+            </a>
+          </paper-dialog>
+
           <iron-pages attr-for-selected="data-route" selected="{{route}}">
             <section data-route="home">
-              <l2p-course-list courses="{{courses}}"></l2p-course-list>
+              <l2p-course-list courses="{{courses}}" login-url="{{loginUrl}}"></l2p-course-list>
             </section>
 
             <section data-route="course">
