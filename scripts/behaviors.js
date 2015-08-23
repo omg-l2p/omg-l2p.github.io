@@ -1,0 +1,1 @@
+window.Behaviors={},window.Behaviors.Url={concatUrl:function(){return"/"+Array.prototype.join.call(arguments,"/")},addToCurrentUrl:function(r,e){"/"!==page.current[page.current.length-1]&&(page.current+="/");var n=page.current+r;return null!=e&&e&&"/"!==n[n.length-1]&&(n+="/"),n},checkFileExtention:function(r){return page.current.substr(-4).toLowerCase()==="."+r}};
