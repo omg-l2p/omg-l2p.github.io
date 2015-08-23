@@ -1,0 +1,106 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<dom-module id="l2p-course-element">
+  <template>
+    <style>
+      paper-material {
+        border-radius: 2px;
+        height: 100%;
+        padding: 16px 0 16px 0;
+        width: calc(98.66% - 16px);
+        margin: 16px auto;
+        background: white;
+      }
+      /* Small */
+      @media (max-width: 600px) {
+
+        paper-material {
+          --menu-container-display: none;
+          width: calc(97.33% - 32px);
+          padding-left: 16px;
+          padding-right: 16px;
+        }
+      }
+      /* Tablet+ */
+      @media (min-width: 601px) {
+
+        paper-material {
+          width: calc(98% - 46px);
+          margin-bottom: 32px;
+          padding-left: 30px;
+          padding-right: 30px;
+        }
+      }
+      a {
+        text-decoration: none;
+        color: #333;
+      }
+
+    </style>
+    <a href="{{concatUrl(course.uniqueid,'learning-materials/')}}">
+      <paper-material id="course" class="course">
+        <p>{{course.courseTitle}}</p>
+      </paper-material>
+    </a>
+  </template>
+  <script>
+  (function() {
+    'use strict';
+
+    Polymer({
+      is: 'l2p-course-element',
+      behaviors: [Behaviors.Url],
+      properties: {
+        course: {
+          type: Object,
+          value: null,
+          notify: true
+        }
+      },
+      observers: [
+        "defineCourse(course)"
+      ],
+      defineCourse: function(course){
+        this.$.course.style.backgroundColor = app.strToColor(course.uniqueid)
+      }
+    });
+  })();
+  </script>
+</dom-module>
+
+<dom-module id="l2p-course-list">
+  <template>
+    <l2p-request-courses login-url="{{loginUrl}}" result="{{courses}}"> </l2p-request-courses>
+    <div horizontal layout wrap class="courses">
+      <template is="dom-repeat" items="{{courses}}">
+        <l2p-course-element course="[[item]]"></l2p-course-element>
+      </template>
+    </div>
+  </template>
+  <script>
+  (function() {
+    'use strict';
+
+    Polymer({
+      is: 'l2p-course-list',
+
+      properties: {
+        courses: {
+          type: Array,
+          notify: true
+        }
+      }
+    });
+  })();
+  </script>
+</dom-module>

@@ -10,12 +10,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 
+<script src="../../bower_components/pdfjs-dist/web/compatibility.js"></script>
 <script src="../../bower_components/pdfjs-dist/build/pdf.combined.js"></script>
 <script src="../../bower_components/pdfjs-dist/web/pdf_viewer.js"></script>
 
 <dom-module id="pdf-viewer">
   <template>
-    <canvas id="pdf-canvas" style="border:1px solid black;"/>
+    <link rel="stylesheet" href="../../bower_components/pdfjs-dist/web/pdf_viewer.css">
+    <div id="pdfcontainer">
+      <div class="pdfViewer"></div>
+    </div>
   </template>
   <script>
   (function() {
@@ -23,44 +27,57 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     Polymer({
       ready: function(){
-        PDFJS.disableWorker = true
-      },
-      showPdf: function(url){
+        var self = this
         PDFJS.disableRange = true
-        PDFJS.getDocument(url).then(function(pdf) {
-          // Using promise to fetch the page
-          pdf.getPage(2).then(function(page) {
-            var scale = 1.5;
-            var viewport = page.getViewport(scale);
-
-            //
-            // Prepare canvas using PDF page dimensions
-            //
-            var canvas = document.getElementById('pdf-canvas');
-            var context = canvas.getContext('2d');
-            canvas.height = viewport.height;
-            canvas.width = viewport.width;
-
-            //
-            // Render PDF page into canvas context
-            //
-            var renderContext = {
-              canvasContext: context,
-              viewport: viewport
-            };
-            page.render(renderContext);
+        this.pdfContainer = this.$.pdfcontainer
+        this.pdfLinkService = new PDFJS.PDFLinkService()
+        var pdfViewer = new PDFJS.PDFViewer({
+          container: this.pdfContainer,
+          linkService: this.pdfLinkService
+        })
+        this.pdfLinkService.setViewer(pdfViewer)
+          // pdfviewer is ready now, set scale
+        this._setPdfViewer(pdfViewer)
+        this.pdfViewer.currentScaleValue = 'page-width'
+        var oldOnResize = window.onresize
+        window.onresize = function(){
+          if (oldOnResize != null) {
+            oldOnResize.apply(arguments)
+          }
+          pdfViewer.currentScaleValue = 'page-width'
+        }
+      },
+      behaviors: [
+        Behaviors.Url
+      ],
+      attached: function(){
+        // make sure that it renders page-width on the first time
+        this.pdfViewer.currentScaleValue = 'page-width'
+      },
+      showPdf: function(url, pdfViewer){
+        if (this.checkFileExtention("pdf")){
+          var self = this;
+          PDFJS.getDocument(url).then(function(pdf) {
+            pdfViewer.setDocument(pdf)
+            self.pdfLinkService.setDocument(pdf, null)
           });
-        });
+        }
       },
       is: 'pdf-viewer',
-
       properties: {
         url: {
           type: Object,
+          notify: true
+        },
+        pdfViewer: {
+          type: Object,
           notify: true,
-          observer: "showPdf"
+          readOnly: true
         }
-      }
+      },
+      observers: [
+        'showPdf(url, pdfViewer)'
+      ]
     });
   })();
   </script>

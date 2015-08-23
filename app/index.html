@@ -16,7 +16,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="generator" content="Polymer Starter Kit" />
-  <title>Polymer Starter Kit</title>
+  <title>OMG L2P</title>
   <!-- Place favicon.ico in the `app/` directory -->
 
   <!-- Chrome for Android theme color -->
@@ -30,7 +30,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
   <!-- Add to homescreen for Chrome on Android -->
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="application-name" content="PSK">
+  <meta name="application-name" content="OMG L2P">
   <link rel="icon" sizes="192x192" href="/images/touch/chrome-touch-icon-192x192.png">
 
   <!-- Add to homescreen for Safari on iOS -->
@@ -42,147 +42,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <!-- Tile icon for Win8 (144x144) -->
   <meta name="msapplication-TileImage" content="/images/touch/ms-touch-icon-144x144-precomposed.png">
 
-  <!-- build:css styles/main.css -->
-  <link rel="stylesheet" href="/styles/main.css">
-  <!-- endbuild-->
-
   <!-- build:js bower_components/webcomponentsjs/webcomponents-lite.min.js -->
   <script src="/bower_components/webcomponentsjs/webcomponents-lite.js"></script>
   <!-- endbuild -->
 
   <!-- will be replaced with /elements/elements.vulcanized.html -->
-  <link rel="import" href="/elements/elements.html">
+  <link rel="import" href="/elements/omg-app/omg-app.html">
+  <link rel="stylesheet" href="/styles/main.css">
+
   <!-- endreplace-->
 </head>
 
 <body unresolved class="fullbleed layout vertical">
   <span id="browser-sync-binding"></span>
-  <template is="dom-bind" id="app">
-
-    <paper-drawer-panel id="paperDrawerPanel">
-      <!-- Drawer Scroll Header Panel -->
-      <paper-scroll-header-panel drawer fixed>
-
-        <!-- Drawer Toolbar -->
-        <paper-toolbar id="drawerToolbar">
-          <span class="paper-font-title">Menu</span>
-        </paper-toolbar>
-
-        <!-- Drawer Content -->
-        <iron-pages attr-for-selected="data-route" selected="{{route}}">
-          <section data-route="home">
-            <paper-menu class="list" attr-for-selected="data-route" selected="{{route}}" on-iron-select="onMenuSelect">
-              <a data-route="home" href="/">
-                <iron-icon icon="home"></iron-icon>
-                <span>Home</span>
-              </a>
-            </paper-menu>
-          </section>
-          <section data-route="course">
-            <paper-menu class="list" attr-for-selected="data-route" selected="{{params.category}}" on-iron-select="onMenuSelect">
-              <a data-route="home" href="/">
-                <iron-icon icon="home"></iron-icon>
-                <span>Go Back</span>
-              </a>
-              <a data-route="anouncements" href="{{concatUrl(params.course, 'anouncements')}}">
-                <iron-icon icon="home"></iron-icon>
-                <span>Anouncements</span>
-              </a>
-              <a data-route="emails" href="{{concatUrl(params.course, 'emails')}}">
-                <iron-icon icon="home"></iron-icon>
-                <span>Emails</span>
-              </a>
-              <a data-route="learning-materials" href="{{concatUrl(params.course, 'learning-materials')}}">
-                <iron-icon icon="home"></iron-icon>
-                <span>Learning Materials</span>
-              </a>
-
-            </paper-menu>
-          </section>
-        </iron-pages>
-      </paper-scroll-header-panel>
-
-      <!-- Main Area -->
-      <paper-scroll-header-panel main condenses keep-condensed-header>
-
-        <!-- Main Toolbar -->
-        <paper-toolbar id="mainToolbar" class="tall">
-          <paper-icon-button id="paperToggle" icon="menu" paper-drawer-toggle></paper-icon-button>
-          <span class="flex"></span>
-
-          <!-- Toolbar icons -->
-          <paper-icon-button icon="refresh"></paper-icon-button>
-          <paper-icon-button icon="search"></paper-icon-button>
-
-          <!-- Application name -->
-          <div class="middle middle-container center horizontal layout">
-            <div class="app-name">Polymer Starter Kit</div>
-          </div>
-
-          <!-- Application sub title -->
-          <div class="bottom bottom-container center horizontal layout">
-            <div class="bottom-title paper-font-subhead">The future of the web today</div>
-          </div>
-
-        </paper-toolbar>
-
-        <!-- Main Content -->
-        <div class="content">
-          <iron-pages attr-for-selected="data-route" selected="{{route}}">
-            <section data-route="home">
-              <paper-material elevation="1">
-                <l2p-request-courses result="{{courses}}"> </l2p-request-courses>
-                <template is="dom-repeat" items="[[courses]]">
-                    <div><a href="{{concatUrl(item.uniqueid,'learning-materials')}}">[[item.courseTitle]]</span></div>
-                </template>
-              </paper-material>
-            </section>
-
-            <section data-route="course">
-              <iron-pages attr-for-selected="data-route" selected="{{params.category}}">
-                <section data-route="learning-materials">
-                  <template is="dom-if" if="{{pathIsDirectory}}">
-                    <paper-material elevation="1">
-                      <l2p-request-learning-materials result="{{learningMaterials}}" course="{{params.course}}"></l2p-request-learning-materials>
-                      <l2p-filelist files="{{learningMaterials}}" currentpath="{{params.path}}" pp="{{params.path}}"></l2p-filelist>
-                      <l2p-request-download-file result="{{download}}" course="14ws-02517" downloadurl="|/ws14/14ws-02517/Lists/StructuredMaterials/Vorlesung/News 05122014.pdf"></l2p-request-download-file>
-                      <a href="{{download}}">File url</a>
-                    </paper-material>
-                  </template>
-                  <template is="dom-if" if="{{pathIsFile}}">
-                    <template is="dom-if" if="{{checkFileExtention('pdf')}}">
-                      <p> its a pdf </p>
-                      <pdf-viewer url="{{download}}">
-                    </template>
-                  </template>
-                </section>
-              </iron-pages>
-            </section>
-
-          </iron-pages>
-        </div>
-      </paper-scroll-header-panel>
-    </paper-drawer-panel>
-    <paper-toast id="caching-complete"
-                 duration="6000"
-                 text="Caching complete! This app will work offline.">
-    </paper-toast>
-
-    <!--platinum-sw-register auto-register
-                          clients-claim
-                          skip-waiting
-                          on-service-worker-installed="displayInstalledToast">
-      <platinum-sw-cache default-cache-strategy="networkFirst"
-                         precache-file="precache.json">
-      </platinum-sw-cache>
-    </platinum-sw-register-->
-
-
-  </template>
-
-  <!-- build:js scripts/app.js -->
-  <script src="/scripts/app.js"></script>
-  <!-- endbuild-->
+  <omg-app></omg-app>
 </body>
 
 </html>
