@@ -49,7 +49,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       },
       _contentChanged: function(content){
-        this.$["announcement-content"].innerHTML = content.body
+        var url = "https://www3.elearning.rwth-aachen.de/"
+        var body = content.body.replace(/href=\"\//g, 'href="'+url)
+        body = body.replace(/src=\"\//g, 'src="'+url)
+        this.$["announcement-content"].innerHTML = body
       },
       _getCreationTime: function(timestamp){
         return new Date(timestamp*1000).toDateString()

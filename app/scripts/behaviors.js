@@ -21,7 +21,15 @@ window.Behaviors.Url = {
   pathIsDirectory: function pathIsDirectory () {
     return !this.pathIsFile()
   },*/
-  checkFileExtention: function pathIsPdf (extention) {
-    return page.current.substr(-4).toLowerCase() === ('.' + extention)
+  checkFileExtention: function (path, extentions) {
+    if (extentions.constructor !== Array) {
+      extentions = [extentions]
+    }
+    for (var i in extentions) {
+      if (page.current.substr(-4).toLowerCase() === ('.' + extentions[i])) {
+        return true
+      }
+    }
+    return false
   }
 }

@@ -55,7 +55,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.pdfViewer.currentScaleValue = 'page-width'
       },
       showPdf: function(url, pdfViewer){
-        if (this.checkFileExtention("pdf")){
+        if (this.checkFileExtention(app.params.path, "pdf")){
           var self = this;
           PDFJS.getDocument(url).then(function(pdf) {
             pdfViewer.setDocument(pdf)
