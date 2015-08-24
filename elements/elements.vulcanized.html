@@ -13681,17 +13681,19 @@ var l2pBehaviors = {};
   };
   Polymer({
     is: 'l2p-request-download-file',
-    performQuery: function (course, path) {
-      var self = this;
-      path = path.split("/")
-      var filename = path[path.length - 1]
-      var semester = course.slice(2,4)+course.slice(0,2)
-      var downloadurl = ["|", semester, course, "Lists", "StructuredMaterials"].concat(path).join("/")
+    performQuery: function (course, path, category, check) {
+      if (check) {
+        var self = this;
+        path = path.split("/")
+        var filename = path[path.length - 1]
+        var semester = course.slice(2,4)+course.slice(0,2)
+        var downloadurl = ["|", semester, course, "Lists", category].concat(path).join("/")
 
-      this.getL2pQueryUrl("downloadFile/"+filename, {downloadUrl: downloadurl, cid: course}).then(function(query){
-        console.log(query.url)
-        self._setResult(query.url)
-      })
+        this.getL2pQueryUrl("downloadFile/"+filename, {downloadUrl: downloadurl, cid: course}).then(function(query){
+          console.log(query.url)
+          self._setResult(query.url)
+        })
+      }
     },
     behaviors: [l2pBehaviors.Auth],
     properties: {
@@ -13707,18 +13709,26 @@ var l2pBehaviors = {};
       path: {
         type: String,
         notify: true
+      },
+      category: {
+        type: String,
+        notify: true
+      },
+      if: {
+        type: Boolean,
+        notify: true
       }
     },
     observers: [
-      "performQuery(course, path)"
+      "performQuery(course, path, category, if)"
     ]
   });
 
   Polymer({
     is: 'l2p-request-shared-documents',
-    performQuery: function (courseid) {
+    performQuery: function (course) {
       var self = this;
-      this.queryL2p("viewAllSharedDocuments", {cid: courseid}).then(function(res){
+      this.queryL2p("viewAllSharedDocuments", {cid: course}).then(function(res){
         self._setResult(res.dataSet);
       })
     },
@@ -13729,21 +13739,21 @@ var l2pBehaviors = {};
         notify: true,
         readOnly: true
       },
-      courseid: {
+      course: {
         type: String,
         notify: true
       },
     },
     observers: [
-      "performQuery(courseid)"
+      "performQuery(course)"
     ]
   });
 
   Polymer({
     is: 'l2p-request-assignments',
-    performQuery: function (courseid) {
+    performQuery: function (course) {
       var self = this;
-      this.queryL2p("viewAllAssignments", {cid: courseid}).then(function(res){
+      this.queryL2p("viewAllAssignments", {cid: course}).then(function(res){
         self._setResult(res.dataSet);
       })
     },
@@ -13754,21 +13764,21 @@ var l2pBehaviors = {};
         notify: true,
         readOnly: true
       },
-      courseid: {
+      course: {
         type: String,
         notify: true
       },
     },
     observers: [
-      "performQuery(courseid)"
+      "performQuery(course)"
     ]
   });
 
   Polymer({
     is: 'l2p-request-media-libraries',
-    performQuery: function (courseid) {
+    performQuery: function (course) {
       var self = this;
-      this.queryL2p("viewAllMediaLibraries", {cid: courseid}).then(function(res){
+      this.queryL2p("viewAllMediaLibraries", {cid: course}).then(function(res){
         self._setResult(res.dataSet);
       })
     },
@@ -13779,21 +13789,21 @@ var l2pBehaviors = {};
         notify: true,
         readOnly: true
       },
-      courseid: {
+      course: {
         type: String,
         notify: true
       },
     },
     observers: [
-      "performQuery(courseid)"
+      "performQuery(course)"
     ]
   });
 
   Polymer({
     is: 'l2p-request-announcements',
-    performQuery: function (courseid) {
+    performQuery: function (course) {
       var self = this;
-      this.queryL2p("viewAllAnouncements", {cid: courseid}).then(function(res){
+      this.queryL2p("viewAllAnnouncements", {cid: course}).then(function(res){
         self._setResult(res.dataSet);
       })
     },
@@ -13804,21 +13814,21 @@ var l2pBehaviors = {};
         notify: true,
         readOnly: true
       },
-      courseid: {
+      course: {
         type: String,
         notify: true
       },
     },
     observers: [
-      "performQuery(courseid)"
+      "performQuery(course)"
     ]
   });
 
   Polymer({
     is: 'l2p-request-emails',
-    performQuery: function (courseid) {
+    performQuery: function (course) {
       var self = this;
-      this.queryL2p("viewAllEmails", {cid: courseid}).then(function(res){
+      this.queryL2p("viewAllEmails", {cid: course}).then(function(res){
         self._setResult(res.dataSet);
       })
     },
@@ -13829,13 +13839,13 @@ var l2pBehaviors = {};
         notify: true,
         readOnly: true
       },
-      courseid: {
+      course: {
         type: String,
         notify: true
       },
     },
     observers: [
-      "performQuery(courseid)"
+      "performQuery(course)"
     ]
   });
 
@@ -67753,7 +67763,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.pdfViewer.currentScaleValue = 'page-width'
       },
       showPdf: function(url, pdfViewer){
-        if (this.checkFileExtention("pdf")){
+        if (this.checkFileExtention(app.params.path, "pdf")){
           var self = this;
           PDFJS.getDocument(url).then(function(pdf) {
             pdfViewer.setDocument(pdf)
@@ -67873,6 +67883,60 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           type: String,
           notify: true
         }
+      }
+    });
+  })();
+  </script>
+</dom-module>
+<dom-module id="l2p-announcement" assetpath="l2p-announcement/">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+      h3 span {
+        color: #333;
+        font-size: 0.7em;
+        font-weight: 100;
+        font-style: italic;
+      }
+      h3 span:before {
+        content: " -";
+        margin-right: 6px;
+      }
+    </style>
+    <h3>{{_getHeader(content, header)}}<span>{{_getCreationTime(content.modifiedTimestamp)}}</span></h3>
+    <div id="announcement-content"></div>
+  </template>
+  <script>
+  (function() {
+    'use strict';
+
+    Polymer({
+      is: 'l2p-announcement',
+
+      properties: {
+        content: {
+          type: Object,
+          notify: true,
+          observer: '_contentChanged'
+        },
+        header: {
+          type: String,
+          notify: true
+        }
+      },
+      _contentChanged: function(content){
+        var url = "https://www3.elearning.rwth-aachen.de/"
+        var body = content.body.replace(/href=\"\//g, 'href="'+url)
+        body = body.replace(/src=\"\//g, 'src="'+url)
+        this.$["announcement-content"].innerHTML = body
+      },
+      _getCreationTime: function(timestamp){
+        return new Date(timestamp*1000).toDateString()
+      },
+      _getHeader: function(content, header){
+        return content[header]
       }
     });
   })();

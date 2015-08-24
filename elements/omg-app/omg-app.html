@@ -50,9 +50,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 <iron-icon icon="home"></iron-icon>
                 <span>Go Back</span>
               </a>
-              <a data-route="anouncements" href="{{concatUrl(params.course, 'anouncements')}}">
+              <a data-route="announcements" href="{{concatUrl(params.course, 'announcements')}}">
                 <iron-icon icon="home"></iron-icon>
-                <span>Anouncements</span>
+                <span>Announcements</span>
               </a>
               <a data-route="emails" href="{{concatUrl(params.course, 'emails')}}">
                 <iron-icon icon="home"></iron-icon>
@@ -62,7 +62,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 <iron-icon icon="home"></iron-icon>
                 <span>Learning Materials</span>
               </a>
-
+              <a data-route="media-libraries" href="{{concatUrl(params.course, 'media-libraries/')}}">
+                <iron-icon icon="home"></iron-icon>
+                <span>Media Libraries</span>
+              </a>
             </paper-menu>
           </section>
         </iron-pages>
@@ -87,7 +90,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           </div>
         </paper-toolbar>
         <!-- Main Content -->
-        
+
         <paper-dialog id="login-dialog" modal opened="{{loginUrl}}">
           <a href="{{loginUrl}}" target="_blank">
             <paper-button raised>Login to L2P</paper-button>
@@ -100,23 +103,53 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <section data-route="home">
               <l2p-course-list courses="{{courses}}" login-url="{{loginUrl}}"></l2p-course-list>
             </section>
-
             <section data-route="course">
+              <template is="dom-if" if="{{pathIsFile}}">
+                <template is="dom-if" if="{{checkFileExtention(params.path, 'pdf')}}">
+                  <l2p-request-download-file if="{{checkFileExtention(params.path, 'pdf')}}" result="{{pdfDownload}}" course="{{params.course}}" path="{{params.path}}" category="{{_getPathCategory(params.category)}}"></l2p-request-download-file>
+                  <pdf-viewer url="{{pdfDownload}}">
+                </template>
+                <template is="dom-if" if="{{checkFileExtention(params.path, 'mp4')}}">
+                  <l2p-request-download-file if="{{checkFileExtention(params.path, 'mp4')}}" result="{{vidDownload}}" course="{{params.course}}" path="{{params.path}}" category="{{_getPathCategory(params.category)}}"></l2p-request-download-file>
+                  <video src="{{vidDownload}}" preload controls width="100%" ></video>
+                </template>
+                <template is="dom-if" if="{{checkFileExtention(params.path, ['jpg', 'png'])}}">
+                  <l2p-request-download-file if="{{checkFileExtention(params.path, ['jpg', 'png'])}}" result="{{picDownload}}" course="{{params.course}}" path="{{params.path}}" category="{{_getPathCategory(params.category)}}"></l2p-request-download-file>
+                  <img src="{{picDownload}}" width="100%" ></ing>
+                </template>
+              </template>
               <iron-pages attr-for-selected="data-route" selected="{{params.category}}">
                 <section data-route="learning-materials">
                   <template is="dom-if" if="{{pathIsDirectory}}">
                     <paper-material elevation="1">
                       <l2p-request-learning-materials result="{{learningMaterials}}" course="{{params.course}}"></l2p-request-learning-materials>
-                      <l2p-filelist files="{{learningMaterials}}" currentpath="{{params.path}}" pp="{{params.path}}"></l2p-filelist>
+                      <l2p-filelist files="{{learningMaterials}}" currentpath="{{params.path}}"></l2p-filelist>
                     </paper-material>
                   </template>
-                  <template is="dom-if" if="{{pathIsFile}}">
-                    <template is="dom-if" if="{{checkFileExtention('pdf')}}">
-                      <l2p-request-download-file result="{{download}}" course="{{params.course}}" path="{{params.path}}"></l2p-request-download-file>
-                      <pdf-viewer url="{{download}}">
-                    </template>
+                </section>
+                <section data-route="announcements">
+                  <l2p-request-announcements result="{{announcements}}" course="{{params.course}}"></l2p-request-announcements>
+                  <template is="dom-repeat" items="{{announcements}}" sort="_sortAnnouncements">
+                    <paper-material elevation="1">
+                      <l2p-announcement content="{{item}}" header="title"></l2p-announcement>
+                    </paper-material>
                   </template>
                 </section>
+                <section data-route="emails">
+                  <l2p-request-emails result="{{emails}}" course="{{params.course}}"></l2p-request-emails>
+                  <template is="dom-repeat" items="{{emails}}" sort="_sortAnnouncements">
+                    <paper-material elevation="1">
+                      <l2p-announcement content="{{item}}" header="subject"></l2p-announcement>
+                    </paper-material>
+                  </template>
+                </section>
+                <section data-route="media-libraries">
+                  <template is="dom-if" if="{{pathIsDirectory}}">
+                    <paper-material elevation="1">
+                      <l2p-request-media-libraries result="{{mediaLibraries}}" course="{{params.course}}"></l2p-request-media-libraries>
+                      <l2p-filelist files="{{mediaLibraries}}" currentpath="{{params.path}}"></l2p-filelist>
+                    </paper-material>
+                  </template>
               </iron-pages>
             </section>
           </iron-pages>
@@ -171,6 +204,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         "_changeStyle(route, params.course)",
         "_changeSelectedCourse(params.course, courses, route)"
       ],
+      _getPathCategory: function(category){
+        if (category === "learning-materials") {
+          return "StructuredMaterials"
+        } else if (category === "media-libraries") {
+          return "MediaLibrary"
+        }
+      },
       _checkRoute: function(route, isRoute){
         return route === isRoute
       },
@@ -215,6 +255,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           this.customStyle["--default-primary-color"]= this.strToColor(course)
         }
         this.updateStyles()
+      },
+      _sortAnnouncements: function(a1, a2){
+        return a1.modifiedTimestamp < a2.modifiedTimestamp ? 1 : -1
       }
     });
   })();
