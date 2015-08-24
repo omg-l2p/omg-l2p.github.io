@@ -50,9 +50,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 <iron-icon icon="home"></iron-icon>
                 <span>Go Back</span>
               </a>
-              <a data-route="anouncements" href="{{concatUrl(params.course, 'anouncements')}}">
+              <a data-route="announcements" href="{{concatUrl(params.course, 'announcements')}}">
                 <iron-icon icon="home"></iron-icon>
-                <span>Anouncements</span>
+                <span>Announcements</span>
               </a>
               <a data-route="emails" href="{{concatUrl(params.course, 'emails')}}">
                 <iron-icon icon="home"></iron-icon>
@@ -87,7 +87,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           </div>
         </paper-toolbar>
         <!-- Main Content -->
-        
+
         <paper-dialog id="login-dialog" modal opened="{{loginUrl}}">
           <a href="{{loginUrl}}" target="_blank">
             <paper-button raised>Login to L2P</paper-button>
@@ -115,6 +115,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                       <l2p-request-download-file result="{{download}}" course="{{params.course}}" path="{{params.path}}"></l2p-request-download-file>
                       <pdf-viewer url="{{download}}">
                     </template>
+                  </template>
+                </section>
+                <section data-route="announcements">
+                  <l2p-request-announcements result="{{announcements}}" course="{{params.course}}"></l2p-request-learning-materials>
+                  <template is="dom-repeat" items="{{announcements}}" sort="_sortAnnouncements">
+                    <paper-material elevation="1">
+                      <l2p-announcement content="{{item}}" header="title"></l2p-announcement>
+                    </paper-material>
+                  </template>
+                </section>
+                <section data-route="emails">
+                  <l2p-request-emails result="{{emails}}" course="{{params.course}}"></l2p-request-learning-materials>
+                  <template is="dom-repeat" items="{{emails}}" sort="_sortAnnouncements">
+                    <paper-material elevation="1">
+                      <l2p-announcement content="{{item}}" header="subject"></l2p-announcement>
+                    </paper-material>
                   </template>
                 </section>
               </iron-pages>
@@ -215,6 +231,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           this.customStyle["--default-primary-color"]= this.strToColor(course)
         }
         this.updateStyles()
+      },
+      _sortAnnouncements: function(a1, a2){
+        return a1.modifiedTimestamp < a2.modifiedTimestamp ? 1 : -1
       }
     });
   })();
