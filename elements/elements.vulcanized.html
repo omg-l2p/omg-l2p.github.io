@@ -13524,7 +13524,7 @@ module.exports = Array.isArray || function (arr) {
 
 var l2pBehaviors = {};
 (function(){
-  function request (method, url, params, postData) {
+  function request (method, url, params, accessToken, postData) {
     return new Promise(function(resolve, reject){
       var req = new XMLHttpRequest();
       if (postData === undefined) {
@@ -13540,30 +13540,18 @@ var l2pBehaviors = {};
         }
       }
       req.open(method, url);
+      /* this does not work with l2p.. :(
+      // It's specified in the oauth man though
+      if(accessToken != null) {
+        req.setRequestHeader("Authorization", "Bearer "+accessToken)
+      }
+      */
       req.setRequestHeader("Content-type","application/x-www-form-urlencoded");
       req.send(postData);
     })
   }
-  function requestBinary (url, params, responseType) {
-    return new Promise(function(resolve, reject){
-      var req = new XMLHttpRequest();
-      req.onreadystatechange = function(){
-        if (req.readyState === 4) {
-          if (req.status === 200) {
-            resolve(req.response);
-          } else {
-            reject(req);
-          }
-        }
-      }
-      req.open("Get", url);
-      req.responseType = responseType
-      req.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-      req.send(null);
-    })
-  }
   window.request = request;
-  var proxyUrl = "https://yatta.ninja:8686/"
+  var proxyUrl = "https://proxyl2p-yayay.rhcloud.com/"
   var clientId = "w1Hk2EGsl2iEg0VWOZR3dcwXdT2LswjBEDogZr5l3wPFJZ7cUUkFIKK6NvLfKVEk.apps.rwth-aachen.de"
   var authBaseUrl = "https://oauth.campus.rwth-aachen.de/oauth2waitress/oauth2.svc/"
   authBaseUrl = proxyUrl + authBaseUrl
@@ -13579,14 +13567,14 @@ var l2pBehaviors = {};
           authInfo.accessToken = localStorage.accessToken;
           authInfo.active = Promise.resolve(authInfo.accessToken);
         } else {
-          this.authInfo.active = request("POST", authBaseUrl+"code", null, "client_id="+clientId+"&scope=l2p2013.rwth userinfo.rwth")
+          this.authInfo.active = request("POST", authBaseUrl+"code", null, null, "client_id="+clientId+"&scope=l2p2013.rwth userinfo.rwth")
             .then(function(result){
               console.log("Received user_code", result);
               authInfo.deviceCode = result.device_code;
               authInfo.userCode = result.user_code;
               self.loginUrl = "https://oauth.campus.rwth-aachen.de/manage/?q=verify&d="+authInfo.userCode
               function pollSecurityToken (resolve) {
-                request("POST", authBaseUrl+"token", null, "client_id="+clientId+"&code="+authInfo.deviceCode+"&grant_type=device")
+                request("POST", authBaseUrl+"token", null, null, "client_id="+clientId+"&code="+authInfo.deviceCode+"&grant_type=device")
                 .then(function(result){
                   if (result.access_token != null) {
                     // success!
@@ -13615,32 +13603,38 @@ var l2pBehaviors = {};
     },
     getL2pQueryUrl: function(method, params) {
       var self = this;
-      var usedAccessToken;
       return self.authenticate().then(function(accessToken){
-        usedAccessToken = accessToken;
-        // create query parameter..
         if (params == null) {
           params = {}
         }
-        params.accessToken = accessToken;
+        params.accessToken = accessToken
+        // create query parameter..
+        var query
         var paramlist = []
         for (var name in params) {
           paramlist.push(name+"="+params[name])
         }
-        var query = "?" + paramlist.join("&")
+        if (paramlist.length > 0) {
+          query = "?" + paramlist.join("&")
+        } else {
+          query = ""
+        }
         var url = "https://www3.elearning.rwth-aachen.de/_vti_bin/L2PServices/api.svc/v1/" + method + query
         // proxy!!
         url = proxyUrl+url
-        return Promise.resolve(url)
+        return Promise.resolve({
+          url: url,
+          accessToken: accessToken
+        })
       });
     },
     queryL2p: function (method, params) {
       var self = this
       var usedAccessToken;
       function makeRequest() {
-        return self.getL2pQueryUrl(method, params).then(function(url, accessToken){
-          usedAccessToken = accessToken
-          return request("Get", url, null)
+        return self.getL2pQueryUrl(method, params).then(function(query){
+          usedAccessToken = query.accessToken
+          return request("Get", query.url, null, query.accessToken)
         })
       }
       return new Promise(function(resolve){
@@ -13649,7 +13643,7 @@ var l2pBehaviors = {};
         }).catch(function(error){
           if (error.status === 401) {
             if (usedAccessToken === self.authInfo.accessToken || true){
-              // only delete if it was teh used access token
+              // only delete if it was the used access token
               self.authInfo.accessToken = false;
               if (localStorage != null) {
                 delete localStorage.accessToken;
@@ -13694,9 +13688,9 @@ var l2pBehaviors = {};
       var semester = course.slice(2,4)+course.slice(0,2)
       var downloadurl = ["|", semester, course, "Lists", "StructuredMaterials"].concat(path).join("/")
 
-      this.getL2pQueryUrl("downloadFile/"+filename, {downloadUrl: downloadurl, cid: course}).then(function(url){
-        console.log(url)
-        self._setResult(url)
+      this.getL2pQueryUrl("downloadFile/"+filename, {downloadUrl: downloadurl, cid: course}).then(function(query){
+        console.log(query.url)
+        self._setResult(query.url)
       })
     },
     behaviors: [l2pBehaviors.Auth],
@@ -13821,7 +13815,7 @@ var l2pBehaviors = {};
   });
 
   Polymer({
-    is: 'l2p-request-Emails',
+    is: 'l2p-request-emails',
     performQuery: function (courseid) {
       var self = this;
       this.queryL2p("viewAllEmails", {cid: courseid}).then(function(res){

@@ -87,14 +87,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           </div>
         </paper-toolbar>
         <!-- Main Content -->
+        
+        <paper-dialog id="login-dialog" modal opened="{{loginUrl}}">
+          <a href="{{loginUrl}}" target="_blank">
+            <paper-button raised>Login to L2P</paper-button>
+          </a>
+        </paper-dialog>
 
         <div class="content">
-
-          <paper-dialog id="login-dialog" modal opened="{{loginUrl}}">
-            <a href="{{loginUrl}}" target="_blank">
-              <paper-button raised>Login to L2P</paper-button>
-            </a>
-          </paper-dialog>
 
           <iron-pages attr-for-selected="data-route" selected="{{route}}">
             <section data-route="home">
