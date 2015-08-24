@@ -76,6 +76,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         <!-- Main Toolbar -->
         <paper-toolbar id="mainToolbar" class="tall">
+          <template is="dom-if" if="{{urlBack}}">
+            <a href="{{urlBack}}">
+              <paper-icon-button icon="arrow-back"></paper-icon-button>
+            </a>
+          </template>
           <paper-icon-button id="paperToggle" icon="menu" paper-drawer-toggle></paper-icon-button>
           <span class="flex"></span>
 
@@ -198,12 +203,32 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         courses: {
           type: Array,
           notify: true
+        },
+        urlBack: {
+          type: String,
+          computed: '_urlChanges(route, params.category, params.path, params.course)'
         }
       },
       observers: [
         "_changeStyle(route, params.course)",
         "_changeSelectedCourse(params.course, courses, route)"
       ],
+      _urlChanges: function(route, category, path, course){
+        if (route === "home") {
+          return null
+        } else if (route === "course") {
+          if (path === "") {
+            return "/"
+          } else {
+            path = path.split("/")
+            path.pop()
+            path.unshift(category)
+            path.unshift(course)
+            path.push("")
+            return this.concatUrl.apply(this, path)
+          }
+        }
+      },
       _getPathCategory: function(category){
         if (category === "learning-materials") {
           return "StructuredMaterials"
