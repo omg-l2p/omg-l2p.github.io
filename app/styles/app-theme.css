@@ -27,6 +27,10 @@ paper-toolbar:not(.tall) .middle {
   display: none;
 }
 
+paper-toolbar:not(.tall) #paperToggle {
+  display: none;
+}
+
 /deep/ #mainContainer.paper-header-panel {
   overflow-x: auto !important;
 }
