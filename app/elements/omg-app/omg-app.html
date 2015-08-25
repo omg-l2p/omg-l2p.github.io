@@ -76,11 +76,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         <!-- Main Toolbar -->
         <paper-toolbar id="mainToolbar" class="tall">
-          <template is="dom-if" if="{{urlBack}}">
-            <a href="{{urlBack}}">
-              <paper-icon-button icon="arrow-back"></paper-icon-button>
-            </a>
-          </template>
           <paper-icon-button id="paperToggle" icon="menu" paper-drawer-toggle></paper-icon-button>
           <span class="flex"></span>
 
@@ -89,10 +84,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
           <!-- Application name -->
           <div class="middle middle-container center horizontal layout">
-            <div class="app-name">
-              <a>Altklausuren</a> > <a>Klausur203934.pdf</a>
-            </div>
+            <div class="app-name">{{selectedCourse.courseTitle}}</div>
           </div>
+          <!-- Application sub title -->
+          <template is="dom-if" if="this.$.mainToolbar.">
+            <div class="bottom bottom-container center horizontal layout">
+              <template is="dom-if" if="{{urlBack}}">
+                <a id="back-button" href="{{urlBack}}">
+                  <paper-fab mini icon="arrow-back"></paper-icon-button>
+                </a>
+              </template>
+              <div class="bottom-title paper-font-subhead">{{appTitle}}</div>
+            </div>
+         </template>
         </paper-toolbar>
         <!-- Main Content -->
 
@@ -102,7 +106,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           </a>
         </paper-dialog>
 
-        <div class="content">
+        <l2p-animated-content class="content">
 
           <iron-pages attr-for-selected="data-route" selected="{{route}}">
             <section data-route="home">
@@ -158,7 +162,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               </iron-pages>
             </section>
           </iron-pages>
-        </div>
+        </l2p-animated-content>
       </paper-header-panel>
     </paper-drawer-panel>
     <paper-toast id="caching-complete"
@@ -207,12 +211,41 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         urlBack: {
           type: String,
           computed: '_urlChanges(route, params.category, params.path, params.course)'
+        },
+        appTitle: {
+          type: String,
+          value: "Welcome to OMG L2P",
+          computed: '_getAppTitle(route, params.category, params.path)'
+        },
+        xxx: {
+          type: Boolean,
+          notify: true
         }
       },
       observers: [
         "_changeStyle(route, params.course)",
         "_changeSelectedCourse(params.course, courses, route)"
       ],
+      _getAppTitle: function(route, category, path) {
+        if (route === "home") {
+          return "OMG L2P"
+        } else if (route === "course") {
+          if (path === "") {
+            if (category === "learning-materials") {
+              return "Learning Materials"
+            } else if (category === "media-libraries") {
+              return "Media Libraries"
+            } else if (category === "emails") {
+              return "Emails"
+            } else if (category === "announcements") {
+              return "Announcements"
+            }
+          } else {
+            var p = path.split("/")
+            return p[p.length-1] // return last element
+          }
+        }
+      },
       _urlChanges: function(route, category, path, course){
         if (route === "home") {
           return null

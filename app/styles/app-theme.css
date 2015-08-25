@@ -23,6 +23,21 @@
   --menu-link-color: #111111;
 }
 
+paper-toolbar:not(.tall) .middle {
+  display: none;
+}
+
+/deep/ #back-button {
+  position: absolute;
+  left: 14px;
+  bottom: -20px;
+}
+
+/deep/ #back-button paper-fab {
+  background: #f44336;
+  z-index: 5;
+}
+
 #login-dialog {
   background: #eee;
   width: 90%;

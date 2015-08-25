@@ -36,7 +36,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     Polymer({
       is: 'l2p-announcement',
-
+      behaviors: [
+        Polymer.NeonAnimationRunnerBehavior
+      ],
       properties: {
         content: {
           type: Object,
@@ -46,6 +48,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         header: {
           type: String,
           notify: true
+        },
+        animationConfig: {
+          value: function(){
+            return {
+              'entry': {
+                name: 'scale-up-animation',
+                node: this
+              },
+              'exit': {
+                name: 'fade-out-animation',
+                node: this
+              }
+            }
+          }
         }
       },
       _contentChanged: function(content){
