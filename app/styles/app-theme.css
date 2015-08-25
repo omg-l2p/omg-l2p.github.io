@@ -27,6 +27,10 @@ paper-toolbar:not(.tall) .middle {
   display: none;
 }
 
+/deep/ #mainContainer.paper-header-panel {
+  overflow-x: auto !important;
+}
+
 /deep/ #back-button {
   position: absolute;
   left: 14px;
