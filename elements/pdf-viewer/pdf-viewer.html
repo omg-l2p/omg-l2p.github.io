@@ -60,6 +60,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           PDFJS.getDocument(url).then(function(pdf) {
             pdfViewer.setDocument(pdf)
             self.pdfLinkService.setDocument(pdf, null)
+            pdfViewer.firstPagePromise.then(function(){
+              pdfViewer.currentScaleValue = 'page-width'
+            })
           });
         }
       },

@@ -22,16 +22,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         <!-- Drawer Toolbar -->
         <paper-toolbar id="drawerToolbar">
-          <template is="dom-if" if="{{!_checkRoute(route, 'home')}}">
-            <div class="paper-font-title">
-              <a href="{{concatUrl(params.course, 'learning-materials/')}}">{{selectedCourse.courseTitleShort}}</a>
-            </div>
-          </template>
-          <template is="dom-if" if="{{_checkRoute(route, 'home')}}">
             <div class="paper-font-title">
               <a href="/">OMG L2P!!</a>
             </div>
-          </template>
         </paper-toolbar>
 
         <!-- Drawer Content -->
@@ -40,7 +33,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <paper-menu class="list" attr-for-selected="data-route" selected="{{route}}" on-iron-select="onMenuSelect">
               <a data-route="home" href="/">
                 <iron-icon icon="home"></iron-icon>
-                <span>Home</span>
+                <span>Course Overview</span>
               </a>
             </paper-menu>
           </section>
@@ -48,22 +41,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <paper-menu class="list" attr-for-selected="data-route" selected="{{params.category}}" on-iron-select="onMenuSelect">
               <a data-route="home" href="/">
                 <iron-icon icon="home"></iron-icon>
-                <span>Go Back</span>
+                <span>Course Overview</span>
               </a>
               <a data-route="announcements" href="{{concatUrl(params.course, 'announcements')}}">
-                <iron-icon icon="home"></iron-icon>
+                <iron-icon icon="icons:announcement"></iron-icon>
                 <span>Announcements</span>
               </a>
               <a data-route="emails" href="{{concatUrl(params.course, 'emails')}}">
-                <iron-icon icon="home"></iron-icon>
+                <iron-icon icon="icons:mail"></iron-icon>
                 <span>Emails</span>
               </a>
               <a data-route="learning-materials" href="{{concatUrl(params.course, 'learning-materials/')}}">
-                <iron-icon icon="home"></iron-icon>
+                <iron-icon icon="icons:chrome-reader-mode"></iron-icon>
                 <span>Learning Materials</span>
               </a>
               <a data-route="media-libraries" href="{{concatUrl(params.course, 'media-libraries/')}}">
-                <iron-icon icon="home"></iron-icon>
+                <iron-icon icon="av:video-library"></iron-icon>
                 <span>Media Libraries</span>
               </a>
             </paper-menu>
@@ -80,11 +73,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <span class="flex"></span>
 
           <!-- Toolbar icons -->
-          <paper-icon-button icon="refresh"></paper-icon-button>
-
+          <template is="dom-if" if="{{checkFileExtention(params.path, 'pdf')}}">
+            <paper-icon-button icon="icons:zoom-out" on-tap="_decreasePdfViewer"></paper-icon-button>
+            <paper-icon-button icon="icons:zoom-in" on-tap="_increasePdfViewer"></paper-icon-button>
+          </template>
           <!-- Application name -->
           <div class="middle middle-container center horizontal layout">
-            <div class="app-name">{{selectedCourse.courseTitle}}</div>
+            <template is="dom-if" if="{{!selectedCourse.courseTitle}}">
+              <div class="app-name">Welcome to OMG L2P</div>
+            </template>
+            <template is="dom-if" if="{{selectedCourse.courseTitle}}">
+              <div class="app-name">{{selectedCourse.courseTitle}}</div>
+            </template>
           </div>
           <!-- Application sub title -->
           <template is="dom-if" if="this.$.mainToolbar.">
@@ -202,6 +202,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         },
         selectedCourse: {
           type: Object,
+          value: {},
           notify: true
         },
         courses: {
@@ -226,9 +227,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         "_changeStyle(route, params.course)",
         "_changeSelectedCourse(params.course, courses, route)"
       ],
+      _increasePdfViewer: function(){
+        var pdfViewer = document.querySelector("pdf-viewer").pdfViewer
+        var page = pdfViewer.currentPageNumber
+        pdfViewer.currentScale += 0.2
+        pdfViewer.currentPageNumber = page
+      },
+      _decreasePdfViewer: function(){
+        var pdfViewer = document.querySelector("pdf-viewer").pdfViewer
+        var page = pdfViewer.currentPageNumber
+        if (pdfViewer.currentScale >= 0.2) {
+          pdfViewer.currentScale -= 0.2
+          pdfViewer.currentPageNumber = page
+        }
+      },
       _getAppTitle: function(route, category, path) {
         if (route === "home") {
-          return "OMG L2P"
+          return "Select a course"
         } else if (route === "course") {
           if (path === "") {
             if (category === "learning-materials") {
