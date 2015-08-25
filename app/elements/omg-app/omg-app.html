@@ -73,8 +73,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <span class="flex"></span>
 
           <!-- Toolbar icons -->
-          <paper-icon-button icon="refresh"></paper-icon-button>
-
+          <template is="dom-if" if="{{checkFileExtention(params.path, 'pdf')}}">
+            <paper-icon-button icon="icons:zoom-out" on-tap="_decreasePdfViewer"></paper-icon-button>
+            <paper-icon-button icon="icons:zoom-in" on-tap="_increasePdfViewer"></paper-icon-button>
+          </template>
           <!-- Application name -->
           <div class="middle middle-container center horizontal layout">
             <template is="dom-if" if="{{!selectedCourse.courseTitle}}">
@@ -225,6 +227,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         "_changeStyle(route, params.course)",
         "_changeSelectedCourse(params.course, courses, route)"
       ],
+      _increasePdfViewer: function(){
+        var pdfViewer = document.querySelector("pdf-viewer").pdfViewer
+        var page = pdfViewer.currentPageNumber
+        pdfViewer.currentScale += 0.2
+        pdfViewer.currentPageNumber = page
+      },
+      _decreasePdfViewer: function(){
+        var pdfViewer = document.querySelector("pdf-viewer").pdfViewer
+        var page = pdfViewer.currentPageNumber
+        if (pdfViewer.currentScale >= 0.2) {
+          pdfViewer.currentScale -= 0.2
+          pdfViewer.currentPageNumber = page
+        }
+      },
       _getAppTitle: function(route, category, path) {
         if (route === "home") {
           return "Select a course"
