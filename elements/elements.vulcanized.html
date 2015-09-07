@@ -13764,7 +13764,7 @@ var l2pBehaviors = {};
           if (error.status === 401) {
             if (usedAccessToken === self.authInfo.accessToken || true){
               // only delete if it was the used access token
-              self.authInfo.accessToken = false;
+              self.authInfo.accessToken = null;
               if (localStorage != null) {
                 delete localStorage.accessToken;
               }
