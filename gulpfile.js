@@ -86,29 +86,37 @@ gulp.task('copy', function () {
   var app = gulp.src([
     'app/*',
     '!app/test',
-    '!app/precache.json'
+    '!app/precache.json',
+    '!app/*.js'
   ], {
     dot: true
   }).pipe(gulp.dest('dist'));
 
   var bower = gulp.src([
-    'bower_components/**/*'
+    'bower_components/**/*','!**.js'
   ]).pipe(gulp.dest('dist/bower_components'));
 
   var elements = gulp.src(['app/elements/**/*.html'])
     .pipe(gulp.dest('dist/elements'));
 
   var swBootstrap = gulp.src(['bower_components/platinum-sw/bootstrap/*.js'])
+    .pipe($.uglify())
     .pipe(gulp.dest('dist/elements/bootstrap'));
 
   var swToolbox = gulp.src(['bower_components/sw-toolbox/*.js'])
+    //.pipe($.uglify())
     .pipe(gulp.dest('dist/sw-toolbox'));
 
+  var uglify = gulp.src(['app/**/*.js', '!bower_components/sw-toolbox/*.js'])
+    .pipe($.uglify())
+    .pipe(gulp.dest('dist'));
+
+  /*
   var vulcanized = gulp.src(['app/elements/elements.html'])
     .pipe($.rename('elements.vulcanized.html'))
     .pipe(gulp.dest('dist/elements'));
-
-  return merge(app, bower, elements, vulcanized, swBootstrap, swToolbox)
+  */
+  return merge(app, bower, elements, /*vulcanized, */swBootstrap, swToolbox, uglify)
     .pipe($.size({title: 'copy'}));
 });
 
@@ -125,7 +133,7 @@ gulp.task('html', function () {
 
   return gulp.src(['app/**/*.html', '!app/{elements,test}/**/*.html'])
     // Replace path for vulcanized assets
-    .pipe($.if('*.html', $.replace('elements/elements.html', 'elements/elements.vulcanized.html')))
+    // .pipe($.if('*.html', $.replace('elements/elements.html', 'elements/elements.vulcanized.html')))
     .pipe(assets)
     // Concatenate And Minify JavaScript
     .pipe($.if('*.js', $.uglify({preserveComments: 'some'})))
@@ -147,9 +155,9 @@ gulp.task('html', function () {
 
 // Vulcanize imports
 gulp.task('vulcanize', function () {
-  var DEST_DIR = 'dist/elements';
+  var DEST_DIR = 'dist';
 
-  return gulp.src('dist/elements/elements.vulcanized.html')
+  return gulp.src('dist/index.html')
     .pipe($.vulcanize({
       stripComments: true,
       inlineCss: true,
