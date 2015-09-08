@@ -155,6 +155,7 @@ paper-toolbar.tall .app-name {
 .paper-font-title {
   margin-top: 21px;
   padding-left: 25px;
+  overflow: visible;
 }
 
 /* Breakpoints */
