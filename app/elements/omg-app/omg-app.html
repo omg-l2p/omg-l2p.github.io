@@ -146,12 +146,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                       <l2p-announcement content="{{item}}" header="title"></l2p-announcement>
                     </paper-material>
                   </template>
+                  <template is="dom-if" if="{{isEmpty(announcements)}}">
+                    <paper-material style="color:red;">
+                      <p>No announcements.. yet!</p>
+                    </paper-material>
+                  </template>
                 </section>
                 <section data-route="emails">
                   <l2p-request-emails result="{{emails}}" course="{{params.course}}"></l2p-request-emails>
                   <template is="dom-repeat" items="{{emails}}" sort="_sortAnnouncements">
                     <paper-material elevation="1">
                       <l2p-announcement content="{{item}}" header="subject"></l2p-announcement>
+                    </paper-material>
+                  </template>
+                  <template is="dom-if" if="{{isEmpty(emails)}}">
+                    <paper-material style="color:red;">
+                      <p>No mails.. yet!</p>
                     </paper-material>
                   </template>
                 </section>
@@ -190,6 +200,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     Polymer({
       ready: function(){
         window.app = this;
+      },
+      isEmpty: function(array){
+        return array != null && array.length === 0
       },
       is: 'omg-app',
       behaviors: [Behaviors.Url],

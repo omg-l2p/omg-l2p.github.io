@@ -32,6 +32,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         </paper-item>
       </a>
     </template>
+    <template is="dom-if" if="{{empty(files)}}">
+      <paper-item style="color:red">
+        Oh noes! This folder is empty..
+      </paper-item>
+    </template>
   </template>
   <script>
   (function() {
@@ -51,6 +56,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           value: [],
           notify: true
         }
+      },
+      empty: function(files){
+        return files != null && files.length === 0
       },
       getIcon: function(item){
         if (item.isDirectory) {
