@@ -150,11 +150,11 @@ paper-toolbar.tall .app-name {
   height: 900px;
 }
 
-.paper-font-title a {
-  color: #333;
-  white-space: normal;
-  text-decoration: none;
-  font-size: 18px;
+
+
+.paper-font-title {
+  margin-top: 21px;
+  padding-left: 25px;
 }
 
 /* Breakpoints */
