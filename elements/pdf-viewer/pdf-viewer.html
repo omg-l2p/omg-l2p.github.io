@@ -57,11 +57,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.pdfViewer.currentScaleValue = 'page-width'
       },
       showPdf: function(url, pdfViewer){
-        if (this.checkFileExtention(app.params.path, "pdf")){
+        if (url == null) {
+          this.pdfContainer.hidden = true
+        } else if (this.checkFileExtention(app.params.path, "pdf")){
           var self = this;
           PDFJS.getDocument(url).then(function(pdf) {
             pdfViewer.setDocument(pdf)
             self.pdfLinkService.setDocument(pdf, null)
+            self.pdfContainer.hidden = false
             pdfViewer.firstPagePromise.then(function(){
               pdfViewer.currentScaleValue = 'page-width'
             })
