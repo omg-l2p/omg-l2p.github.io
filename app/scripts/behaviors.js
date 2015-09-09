@@ -5,6 +5,13 @@ window.Behaviors.Url = {
   concatUrl: function concat () {
     return '/' + Array.prototype.join.call(arguments, '/')
   },
+  getFileDownloadUrl: function getFileDownloadUrl(download, name, isDirectory){
+    if (download != "") {
+      return download
+    } else {
+      return this.addToCurrentUrl(name, isDirectory)
+    }
+  },
   addToCurrentUrl: function addToCurrentUrl (path, appendSlash) {
     if (page.current[page.current.length - 1] !== '/') {
       page.current += '/'
@@ -26,7 +33,7 @@ window.Behaviors.Url = {
       extentions = [extentions]
     }
     for (var i in extentions) {
-      if (page.current.substr(-4).toLowerCase() === ('.' + extentions[i])) {
+      if (path.substr(-4).toLowerCase() === ('.' + extentions[i])) {
         return true
       }
     }

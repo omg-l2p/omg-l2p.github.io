@@ -90,16 +90,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             </template>
           </div>
           <!-- Application sub title -->
-          <template is="dom-if" if="this.$.mainToolbar.">
-            <div class="bottom bottom-container center horizontal layout">
-              <template is="dom-if" if="{{urlBack}}">
-                <a id="back-button" href="{{urlBack}}">
-                  <paper-fab mini icon="arrow-back"></paper-icon-button>
-                </a>
-              </template>
-              <div class="bottom-title paper-font-subhead">{{appTitle}}</div>
-            </div>
-         </template>
+          <div class="bottom bottom-container center horizontal layout">
+            <template is="dom-if" if="{{urlBack}}">
+              <a id="back-button" href="{{urlBack}}">
+                <paper-fab mini icon="arrow-back"></paper-icon-button>
+              </a>
+            </template>
+            <div class="bottom-title paper-font-subhead">{{appTitle}}</div>
+          </div>
         </paper-toolbar>
         <!-- Main Content -->
 
@@ -135,7 +133,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                   <template is="dom-if" if="{{pathIsDirectory}}">
                     <paper-material elevation="1">
                       <l2p-request-learning-materials result="{{learningMaterials}}" course="{{params.course}}"></l2p-request-learning-materials>
-                      <l2p-filelist files="{{learningMaterials}}" currentpath="{{params.path}}"></l2p-filelist>
+                      <l2p-filelist files="{{learningMaterials}}" currentpath="{{params.path}}" params="{{params}}"></l2p-filelist>
                     </paper-material>
                   </template>
                 </section>
