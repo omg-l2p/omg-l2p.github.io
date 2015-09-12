@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.1.399';
-PDFJS.build = '23cb01c';
+PDFJS.version = '1.1.462';
+PDFJS.build = '11a0e1c';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -4264,6 +4264,9 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
 
         this.current = this.stateStack.pop();
         this.ctx.restore();
+
+        // Ensure that the clipping path is reset (fixes issue6413.pdf).
+        this.pendingClip = null;
 
         this.cachedGetSinglePixelWidth = null;
       }
