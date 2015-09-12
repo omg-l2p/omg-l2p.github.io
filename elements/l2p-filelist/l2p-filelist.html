@@ -12,25 +12,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <dom-module id="l2p-filelist">
   <template>
-    <style>
-      .filelist > iron-icon {
-        padding-right: 10px;
-      }
-      a {
-        text-decoration: none;
-        color: var(--default-primary-color);
-      }
-    </style>
     <template id="filelist" is="dom-repeat" items="[[files]]" filter="matchesCurrentPath" sort="_sort">
-      <a href="{{addToCurrentUrl(item.name, item.isDirectory)}}">
-        <paper-item class="filelist">
-          <iron-icon icon="{{getIcon(item)}}"></iron-icon>
-          <paper-item-body two-line>
-            <div>[[item.name]]</div>
-            <div secondary>{{_getTimeSinceCreation(item)}}</div>
-          </paper-item-body>
-        </paper-item>
-      </a>
+      <l2p-filelist-item
+        course="{{params.course}}"
+        item="{{item}}"
+        category="{{_getPathCategory(params.category)}}"
+        params="{{params}}">
+      </l2p-filelist-item>
     </template>
     <template is="dom-if" if="{{empty(files)}}">
       <paper-item style="color:red">
@@ -55,17 +43,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           type: Array,
           value: [],
           notify: true
+        },
+        params: {
+          type: Object,
+          notify: true
         }
       },
       empty: function(files){
         return files != null && files.length === 0
-      },
-      getIcon: function(item){
-        if (item.isDirectory) {
-          return "folder";
-        } else {
-          return "description";
-        }
       },
       pathChanged: function(path){
         this.$.filelist.render()
@@ -80,27 +65,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
       _sort: function(c1, c2){
         return c1.isDirectory && !c2.isDirectory || (c1.isDirectory === c2.isDirectory && c1.name < c2.name) ? -1 : 1
-      },
-      _getTimeSinceCreation: function(item){
-        if (item.fileInformation == null) {return ""}
-        var diff = Math.round((new Date() - new Date(item.fileInformation.modifiedTimestamp*1000))/(1000*60))
-        if (diff <= 1) return "A minute ago"
-        if (diff < 60) return diff + " minutes ago"
-        diff = Math.round(diff / 60)
-        if (diff <= 1) return "An hour ago"
-        if (diff < 24) return diff+" hours ago"
-        diff = Math.round(diff/24)
-        if (diff <= 1) return "A day ago"
-        if (diff < 30) return diff+" days ago"
-        var diffW = Math.round(diff/7)
-        if (diffW <= 1) return "A week ago"
-        if (diffW < 4) return diffW + " weeks ago"
-        var diffM = Math.round(diff/30)
-        if (diffM <= 1) return "A month ago"
-        if (diffM < 12) return diffM + " month ago"
-        var diffY = Math.round(diff/365)
-        if (diffY <= 1) return "A year ago"
-        return diffY + " years ago"
       }
     });
   })();

@@ -156,7 +156,7 @@ var l2pBehaviors = {};
         type: Object,
         notify: true,
         value: { // yeah, its a shared property!
-          accessToken: false, // append this on every request
+          accessToken: null, // append this on every request
           created: 0, // when this was created
           active: false, // currently querying for authentication
           deviceCode: false,
@@ -173,8 +173,8 @@ var l2pBehaviors = {};
   Polymer({
     is: 'l2p-request-download-file',
     performQuery: function (course, path, category, check) {
+      this._setResult("")
       if (check) {
-        this._setResult(null)
         var self = this;
         path = path.split("/")
         var filename = path[path.length - 1]
@@ -182,7 +182,6 @@ var l2pBehaviors = {};
         var downloadurl = ["|", semester, course, "Lists", category].concat(path).join("/")
 
         this.getL2pQueryUrl("downloadFile/"+filename, {downloadUrl: downloadurl, cid: course}).then(function(query){
-          console.log(query.url)
           self._setResult(query.url)
         })
       }
@@ -208,7 +207,8 @@ var l2pBehaviors = {};
       },
       if: {
         type: Boolean,
-        notify: true
+        notify: true,
+        value: false
       }
     },
     observers: [
