@@ -93,8 +93,12 @@ gulp.task('copy', function () {
   }).pipe(gulp.dest('dist'));
 
   var bower = gulp.src([
-    'bower_components/**/*','!**.js'
+    'bower_components/**/*','!**/*.js'
   ]).pipe(gulp.dest('dist/bower_components'));
+
+  var bowerjs = gulp.src(['bower_components/**/*.js'])
+    // .pipe($.uglify())
+    .pipe(gulp.dest('dist/bower_components'));
 
   var elements = gulp.src(['app/elements/**/*.html'])
     .pipe(gulp.dest('dist/elements'));
@@ -116,7 +120,7 @@ gulp.task('copy', function () {
     .pipe($.rename('elements.vulcanized.html'))
     .pipe(gulp.dest('dist/elements'));
   */
-  return merge(app, bower, elements, /*vulcanized, */swBootstrap, swToolbox, uglify)
+  return merge(app, bower, bowerjs, elements, /*vulcanized, */swBootstrap, swToolbox, uglify)
     .pipe($.size({title: 'copy'}));
 });
 
@@ -157,13 +161,14 @@ gulp.task('html', function () {
 gulp.task('vulcanize', function () {
   var DEST_DIR = 'dist';
 
-  return gulp.src('dist/index.html')
+  return gulp.src('dist/elements/omg-app/omg-app.html')
     .pipe($.vulcanize({
       stripComments: true,
       inlineCss: true,
-      inlineScripts: true
+      inlineScripts: true,
+      excludes: ['pdf.combined.js', 'compatibility.js', 'pdf_viewer.js']
     }))
-    .pipe(gulp.dest(DEST_DIR))
+    .pipe(gulp.dest('dist/elements/omg-app/'))
     .pipe($.size({title: 'vulcanize'}));
 });
 

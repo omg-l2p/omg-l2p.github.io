@@ -10,25 +10,24 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 
-<script src="../../bower_components/pdfjs-dist/web/compatibility.js"></script>
+<!--script src="../../bower_components/pdfjs-dist/web/compatibility.js"></script>
 <script src="../../bower_components/pdfjs-dist/build/pdf.combined.js"></script>
-<script src="../../bower_components/pdfjs-dist/web/pdf_viewer.js"></script>
+<script src="../../bower_components/pdfjs-dist/web/pdf_viewer.js"></script-->
 
 <dom-module id="pdf-viewer">
   <template>
-    <link rel="stylesheet" href="../../bower_components/pdfjs-dist/web/pdf_viewer.css">
     <div id="pdfcontainer">
       <div class="pdfViewer"></div>
     </div>
   </template>
   <script>
+  'use strict';
   (function() {
-    'use strict';
-
+    PDFJS.disableRange = true
+    PDFJS.disableWorker = true
     Polymer({
       ready: function(){
         var self = this
-        PDFJS.disableRange = true
         this.pdfContainer = this.$.pdfcontainer
         this.pdfLinkService = new PDFJS.PDFLinkService()
         var pdfViewer = new PDFJS.PDFViewer({
@@ -40,6 +39,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this._setPdfViewer(pdfViewer)
         this.pdfViewer.currentScaleValue = 'page-width'
         var oldOnResize = window.onresize
+
         window.onresize = function(){
           if (oldOnResize != null) {
             oldOnResize.apply(arguments)
@@ -57,7 +57,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.pdfViewer.currentScaleValue = 'page-width'
       },
       showPdf: function(url, pdfViewer){
-        if (url == null) {
+        if (url == null || url == "") {
           this.pdfContainer.hidden = true
         } else if (this.checkFileExtention(app.params.path, "pdf")){
           var self = this;
@@ -88,5 +88,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       ]
     });
   })();
+
   </script>
 </dom-module>
