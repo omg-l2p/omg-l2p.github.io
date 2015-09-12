@@ -117,7 +117,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               <template is="dom-if" if="{{pathIsFile}}">
                 <template is="dom-if" if="{{checkFileExtention(params.path, 'pdf')}}">
                   <l2p-request-download-file if="{{checkFileExtention(params.path, 'pdf')}}" result="{{pdfDownload}}" course="{{params.course}}" path="{{params.path}}" category="{{_getPathCategory(params.category)}}"></l2p-request-download-file>
-                  <pdf-viewer url="{{pdfDownload}}">
+                  <pdf-viewer url="{{pdfDownload}}"></pdf-viewer>
                 </template>
                 <template is="dom-if" if="{{checkFileExtention(params.path, 'mp4')}}">
                   <l2p-request-download-file if="{{checkFileExtention(params.path, 'mp4')}}" result="{{vidDownload}}" course="{{params.course}}" path="{{params.path}}" category="{{_getPathCategory(params.category)}}"></l2p-request-download-file>
@@ -126,6 +126,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 <template is="dom-if" if="{{checkFileExtention(params.path, ['jpg', 'png'])}}">
                   <l2p-request-download-file if="{{checkFileExtention(params.path, ['jpg', 'png'])}}" result="{{picDownload}}" course="{{params.course}}" path="{{params.path}}" category="{{_getPathCategory(params.category)}}"></l2p-request-download-file>
                   <img src="{{picDownload}}" width="100%" ></ing>
+                </template>
+                <template is="dom-if" if="{{checkFileExtention(params.path, 'txt')}}">
+                  <l2p-request-download-file if="{{checkFileExtention(params.path, 'txt')}}" result="{{txtDownload}}" course="{{params.course}}" path="{{params.path}}" category="{{_getPathCategory(params.category)}}"></l2p-request-download-file>
+                  <txt-viewer url="{{txtDownload}}"></txt-viewer>
                 </template>
               </template>
               <iron-pages attr-for-selected="data-route" selected="{{params.category}}">
