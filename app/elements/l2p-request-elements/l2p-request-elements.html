@@ -173,8 +173,8 @@ var l2pBehaviors = {};
   Polymer({
     is: 'l2p-request-download-file',
     performQuery: function (course, path, category, check) {
+      this._setResult("")
       if (check) {
-        this._setResult(null)
         var self = this;
         path = path.split("/")
         var filename = path[path.length - 1]
@@ -207,7 +207,8 @@ var l2pBehaviors = {};
       },
       if: {
         type: Boolean,
-        notify: true
+        notify: true,
+        value: false
       }
     },
     observers: [

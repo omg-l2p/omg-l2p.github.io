@@ -5,6 +5,13 @@ window.Behaviors.Url = {
   concatUrl: function concat () {
     return '/' + Array.prototype.join.call(arguments, '/')
   },
+  _getPathCategory: function(category){
+    if (category === "learning-materials") {
+      return "StructuredMaterials"
+    } else if (category === "media-libraries") {
+      return "MediaLibrary"
+    }
+  },
   getFileDownloadUrl: function getFileDownloadUrl(download, name, isDirectory){
     if (download != "") {
       return download

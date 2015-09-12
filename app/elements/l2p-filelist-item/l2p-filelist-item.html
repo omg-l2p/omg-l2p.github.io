@@ -12,25 +12,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <dom-module id="l2p-filelist-item">
   <template>
-  <style>
-    iron-icon {
-      padding-right: 10px;
-    }
-    a {
-      text-decoration: none;
-      color: var(--default-primary-color);
-    }
-  </style>
-  <l2p-request-download-file if="{{checkFileExtention(item.name, ['pdf', 'txt', 'mp4'])}}" result="{{download}}" course="{{course}}" path="{{addToCurrentUrl(item.name, item.isDirectory)}}" category="{{params.category}}"></l2p-request-download-file>
-  <a href="{{getFileDownloadUrl(download, item.name, item.isDirectory)}}">
-    <paper-item class="filelist flex">
-      <iron-icon icon="{{getIcon(item)}}"></iron-icon>
-      <paper-item-body two-line>
-        <div>[[item.name]]</div>
-        <div secondary>{{_getTimeSinceCreation(item)}}</div>
-      </paper-item-body>
-    </paper-item>
-  </a>
+    <style>
+      iron-icon {
+        padding-right: 10px;
+      }
+      a {
+        text-decoration: none;
+        color: var(--default-primary-color);
+      }
+    </style>
+    <l2p-request-download-file id="dd" if="true" result="{{download}}" course="{{course}}" path="{{getItemPath(item.name)}}" category="{{_getPathCategory(params.category)}}"></l2p-request-download-file>
+    <a href="{{fileUrl}}">
+      <paper-item class="filelist flex">
+        <iron-icon icon="{{getIcon(item)}}"></iron-icon>
+        <paper-item-body two-line>
+          <div>[[item.name]]</div>
+          <div secondary>{{_getTimeSinceCreation(item)}}</div>
+        </paper-item-body>
+      </paper-item>
+    </a>
   </template>
   <script>
   (function() {
@@ -38,6 +38,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     Polymer({
       is: 'l2p-filelist-item',
+      getTrue: function(name, isDir){
+        var yes = !(isDir || Behaviors.Url.checkFileExtention(name, ['pdf', 'txt']))
+        if (!yes) {
+          this.download = ""
+        }
+        return yes
+      },
+      getItemPath: function(name){
+        var path = app.params.path
+        if (path !== "") {
+          path += "/"
+        }
+        return path + name
+      },
       properties: {
         item: {
           type: Object,
@@ -55,6 +69,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           type: String,
           notify: true,
           value: ""
+        },
+        needDownloadUrl: {
+          type: String,
+          notify: true,
+          computed: 'getTrue(item.name, item.isDirectory)'
+        },
+        fileUrl: {
+          type: String,
+          notify: true,
+          computed: 'getFileUrl(needDownloadUrl, download, item.name, item.isDirectory)'
+        }
+      },
+      getFileUrl: function(needDownloadUrl, download, name, isDir){
+        if (needDownloadUrl && download !== "") {
+          return download
+        } else {
+          return this.getFileDownloadUrl("", name, isDir)
         }
       },
       behaviors: [Behaviors.Url],
