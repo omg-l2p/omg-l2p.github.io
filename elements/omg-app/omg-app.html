@@ -18563,6 +18563,41 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   })();
   </script>
 </dom-module>
+<dom-module id="txt-viewer" assetpath="../txt-viewer/">
+  <template>
+    <iron-ajax auto="" url="{{url}}" handle-as="txt" on-response="handleResponse" debounce-duration="300"></iron-ajax>
+
+    <style>
+      pre {
+        padding: 2em 1em 2em 1em;
+      }
+    </style>
+
+    <paper-material elevation="1">
+      <pre id="content"></pre>
+    </paper-material>
+  </template>
+  <script>
+  (function() {
+    'use strict';
+
+    Polymer({
+      is: 'txt-viewer',
+
+      properties: {
+        url: {
+          type: String,
+          value: null,
+          notify: true
+        }
+      },
+      handleResponse: function(res){
+        this.$.content.innerHTML = res.detail.response
+      }
+    });
+  })();
+  </script>
+</dom-module>
 </div><dom-module id="omg-app">
   
   <style>
@@ -18671,8 +18706,8 @@ a,paper-menu a{text-decoration:none}:root{--dark-primary-color:#303F9F;--default
               <template is="dom-if" if="{{pathIsFile}}">
                 <template is="dom-if" if="{{checkFileExtention(params.path, 'pdf')}}">
                   <l2p-request-download-file if="{{checkFileExtention(params.path, 'pdf')}}" result="{{pdfDownload}}" course="{{params.course}}" path="{{params.path}}" category="{{_getPathCategory(params.category)}}"></l2p-request-download-file>
-                  <pdf-viewer url="{{pdfDownload}}">
-                </pdf-viewer></template>
+                  <pdf-viewer url="{{pdfDownload}}"></pdf-viewer>
+                </template>
                 <template is="dom-if" if="{{checkFileExtention(params.path, 'mp4')}}">
                   <l2p-request-download-file if="{{checkFileExtention(params.path, 'mp4')}}" result="{{vidDownload}}" course="{{params.course}}" path="{{params.path}}" category="{{_getPathCategory(params.category)}}"></l2p-request-download-file>
                   <video src="{{vidDownload}}" preload="" controls="" width="100%"></video>
@@ -18680,6 +18715,10 @@ a,paper-menu a{text-decoration:none}:root{--dark-primary-color:#303F9F;--default
                 <template is="dom-if" if="{{checkFileExtention(params.path, ['jpg', 'png'])}}">
                   <l2p-request-download-file if="{{checkFileExtention(params.path, ['jpg', 'png'])}}" result="{{picDownload}}" course="{{params.course}}" path="{{params.path}}" category="{{_getPathCategory(params.category)}}"></l2p-request-download-file>
                   <img src="{{picDownload}}" width="100%">
+                </template>
+                <template is="dom-if" if="{{checkFileExtention(params.path, 'txt')}}">
+                  <l2p-request-download-file if="{{checkFileExtention(params.path, 'txt')}}" result="{{txtDownload}}" course="{{params.course}}" path="{{params.path}}" category="{{_getPathCategory(params.category)}}"></l2p-request-download-file>
+                  <txt-viewer url="{{txtDownload}}"></txt-viewer>
                 </template>
               </template>
               <iron-pages attr-for-selected="data-route" selected="{{params.category}}">
